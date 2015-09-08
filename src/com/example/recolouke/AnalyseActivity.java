@@ -5,9 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -80,8 +87,22 @@ public class AnalyseActivity extends Activity {
 			}
 		});
 		
-		Global.IMG_SELECTED_CROPPED = Global.IMG_SELECTED;
-		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED_CROPPED);
+		// For having the same caracterics on the gray image
+		Global.IMG_SELECTED_GRAY = Bitmap.createBitmap(Global.IMG_SELECTED);
+		// Creation of a Mat
+		Mat mat_IMG_SELECTED = new Mat (Global.IMG_SELECTED.getHeight(), Global.IMG_SELECTED.getWidth(), CvType.CV_8UC3);
+		// Conversion of the image to the Mat
+		Utils.bitmapToMat(Global.IMG_SELECTED, mat_IMG_SELECTED);
+		// Convert the image mat from color to gray
+		Imgproc.cvtColor(mat_IMG_SELECTED, mat_IMG_SELECTED, Imgproc.COLOR_RGB2GRAY);
+		// Recreate a bitmap from the mat 
+		// (just for display if the result works here otherwise normally we display the original image)
+		Utils.matToBitmap(mat_IMG_SELECTED, Global.IMG_SELECTED_GRAY);
+		
+		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED_GRAY);	
+		
+		// Display a list of logo
+		//TODO (gap between item to fix)
 		
 		// For each row in the list which stores logo and brand
         List<HashMap<String,String>> adapterList = new ArrayList<HashMap<String,String>>();
