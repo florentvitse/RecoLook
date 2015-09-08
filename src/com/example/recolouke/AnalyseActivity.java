@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.opencv.android.OpenCVLoader;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +20,15 @@ import android.widget.SimpleAdapter;
 
 public class AnalyseActivity extends Activity {
 
+	final static String TAG = "[Activity] - AnalyseActivity";
+	
+	static {
+		if(!OpenCVLoader.initDebug()){
+			// ERROR - Initialization Error
+			Log.e(TAG, "OpenCV - Initialization Error");
+		}
+	}
+	
 	// Array of strings storing brand names
     String[] brands = new String[] {
         "AMD",
