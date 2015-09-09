@@ -8,7 +8,10 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Scalar;
+import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
@@ -87,19 +90,7 @@ public class AnalyseActivity extends Activity {
 			}
 		});
 		
-		// For having the same caracterics on the gray image
-		Global.IMG_SELECTED_GRAY = Bitmap.createBitmap(Global.IMG_SELECTED);
-		// Creation of a Mat
-		Mat mat_IMG_SELECTED = new Mat (Global.IMG_SELECTED.getHeight(), Global.IMG_SELECTED.getWidth(), CvType.CV_8UC3);
-		// Conversion of the image to the Mat
-		Utils.bitmapToMat(Global.IMG_SELECTED, mat_IMG_SELECTED);
-		// Convert the image mat from color to gray
-		Imgproc.cvtColor(mat_IMG_SELECTED, mat_IMG_SELECTED, Imgproc.COLOR_RGB2GRAY);
-		// Recreate a bitmap from the mat 
-		// (just for display if the result works here otherwise normally we display the original image)
-		Utils.matToBitmap(mat_IMG_SELECTED, Global.IMG_SELECTED_GRAY);
-		
-		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED_GRAY);	
+		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);	
 		
 		// Display a list of logo
 		//TODO (gap between item to fix)
@@ -146,5 +137,24 @@ public class AnalyseActivity extends Activity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	public void analyseScene(Mat srcGrayscale, int featureDetector, int descriptorExtractor)
+	{
+		// Creation of the detector
+		//TODO FeatureDetector.ORB to give to the method here (generic method also)
+		FeatureDetector _detector = FeatureDetector.create(featureDetector);
+		// Object that will store the keypoint of the scene
+		MatOfKeyPoint _scenekeypoints = new MatOfKeyPoint();
+		// Detection of the keyPoints of the scene
+		_detector.detect(srcGrayscale, _scenekeypoints);
+		// Creation of the descriptor
+		// DescriptorExtractor.ORB to give to the method here (generic method also)
+		DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
+		Mat _descriptors = new Mat();
+		// Extraction of the descriptors
+        _descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors);
+		
+		
 	}
 }

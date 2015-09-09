@@ -92,9 +92,7 @@ public class MainActivity extends Activity {
 					try {
 						Global.IMG_SELECTED = ImageUtility.RotateBitmap(
 								MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData())
-								,
-								getCameraPhotoOrientation(data.getData())
-										);
+								,getCameraPhotoOrientation(data.getData()));
 						((ImageView) findViewById(R.id.imgView))
 							.setImageBitmap(Global.IMG_SELECTED);
 						findViewById(R.id.btnAnalyse).setVisibility(View.VISIBLE);
