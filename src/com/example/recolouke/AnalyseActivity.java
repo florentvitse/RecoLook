@@ -1,5 +1,8 @@
 package com.example.recolouke;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,17 +11,24 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Scalar;
 import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -118,6 +128,8 @@ public class AnalyseActivity extends Activity {
  
         // Getting a reference to listview (composant) to apply the adapter
         ((ListView) findViewById(R.id.listview_widget)).setAdapter(adapter);
+        
+        analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED), FeatureDetector.ORB, DescriptorExtractor.ORB);
 	}
 
 	@Override
@@ -144,17 +156,47 @@ public class AnalyseActivity extends Activity {
 		// Creation of the detector
 		//TODO FeatureDetector.ORB to give to the method here (generic method also)
 		FeatureDetector _detector = FeatureDetector.create(featureDetector);
+		// Creation of the descriptor
+		// DescriptorExtractor.ORB to give to the method here (generic method also)
+		DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
+		// Creation of the matcher
+		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+		// Vector of matches
+		MatOfDMatch matches = new MatOfDMatch();
+		
 		// Object that will store the keypoint of the scene
 		MatOfKeyPoint _scenekeypoints = new MatOfKeyPoint();
 		// Detection of the keyPoints of the scene
 		_detector.detect(srcGrayscale, _scenekeypoints);
-		// Creation of the descriptor
-		// DescriptorExtractor.ORB to give to the method here (generic method also)
-		DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
-		Mat _descriptors = new Mat();
+		Mat _descriptors_scene = new Mat();
 		// Extraction of the descriptors
-        _descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors);
+        _descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
 		
+        // Object that will store the keypoint of the scene
+		MatOfKeyPoint _objectkeypoints = new MatOfKeyPoint();
+		// Detection of the keyPoints of the scene
+		_detector.detect(srcGrayscale, _objectkeypoints);
+		Mat _descriptors_object = new Mat();
+		// Extraction of the descriptors
 		
-	}
+		// Get a Bitmap logo to compare
+		Uri drawableUri = ImageUtility.getDrawableUri(this, logoIDs[0]);
+		Mat objToCompare = null;
+		try {
+			objToCompare = ImageUtility.convertToGrayscaleMat(MediaStore.Images.Media.getBitmap(getContentResolver(), drawableUri));
+		} catch (Exception e) {
+			// Error
+		}
+		_detector.detect(objToCompare, _objectkeypoints);
+        _descriptor.compute(objToCompare, _objectkeypoints, _descriptors_object);
+        
+        //TODO Comparison
+        
+        matcher.match(_descriptors_object, _descriptors_scene, matches);
+        // Display in the logCat console (level WARN) the number of 'matches' the system thinks it have found
+        Log.w(TAG, String.valueOf(matches.total()));
+		
+       
+		
+	}	
 }

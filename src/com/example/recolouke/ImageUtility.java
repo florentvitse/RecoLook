@@ -1,17 +1,66 @@
 package com.example.recolouke;
 
+import java.io.File;
+
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Application;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.media.ExifInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.net.Uri;
+import android.provider.MediaStore;
 
 public class ImageUtility extends Application {
+	
+	public static String getPath(Context ctx, Uri uri) 
+    {
+        String valR = null;
+		
+		String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = ctx.getContentResolver().query(uri, projection, null, null, null);
+        if (cursor != null) 
+        {
+        	cursor.moveToFirst();
+        	valR = cursor.getString( cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA) );
+        }
+        cursor.close();
+        return valR;
+    }
+	
+	public static int getCameraPhotoOrientation(Context ctx, Uri imagePath){
+	    int rotate = 0;
+	    try {
+	        File imageFile = new File(getPath(ctx, imagePath));
+	        
+	        ExifInterface exif = new ExifInterface(imageFile.getAbsolutePath());
+	        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+	        switch (orientation) {
+		        case ExifInterface.ORIENTATION_ROTATE_90:
+		            rotate = 90;
+		            break;
+		        case ExifInterface.ORIENTATION_ROTATE_180:
+		            rotate = 180;
+		            break;
+		        case ExifInterface.ORIENTATION_ROTATE_270:
+		            rotate = 270;
+		            break;
+		        default: break;
+	        }
+	    } catch (Exception e) {
+	        //ERROR
+	    }
+	    return rotate;
+	}
 	
 	public static Bitmap cropCenterBitmap(Bitmap src)
 	{	
@@ -58,6 +107,15 @@ public class ImageUtility extends Application {
 	      Matrix matrix = new Matrix();
 	      matrix.postRotate(angle);
 	      return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), matrix, true);
+	}
+	
+	public static Uri getDrawableUri(Context ctx, int drawable)
+	{
+		Uri imageUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE 
+				+ "://" + ctx.getResources().getResourcePackageName(drawable) 
+				+ '/' + ctx.getResources().getResourceTypeName(drawable) + '/' 
+				+ ctx.getResources().getResourceEntryName(drawable) );
+		return imageUri;
 	}
 	
 	public static Bitmap convertToGrayscale(Bitmap src)

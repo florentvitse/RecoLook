@@ -92,7 +92,7 @@ public class MainActivity extends Activity {
 					try {
 						Global.IMG_SELECTED = ImageUtility.RotateBitmap(
 								MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData())
-								,getCameraPhotoOrientation(data.getData()));
+								,ImageUtility.getCameraPhotoOrientation(this, data.getData()));
 						((ImageView) findViewById(R.id.imgView))
 							.setImageBitmap(Global.IMG_SELECTED);
 						findViewById(R.id.btnAnalyse).setVisibility(View.VISIBLE);
@@ -110,7 +110,8 @@ public class MainActivity extends Activity {
 			default : break;
 		}
 	}
-
+	
+	/*
 	public String getPath(Uri uri) 
     {
         String valR = null;
@@ -150,7 +151,7 @@ public class MainActivity extends Activity {
 	        //ERROR
 	    }
 	    return rotate;
-	}
+	}*/
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
