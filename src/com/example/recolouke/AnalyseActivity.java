@@ -31,7 +31,7 @@ import android.widget.Toast;
 
 public class AnalyseActivity extends Activity {
 
-	final static String TAG = "[Activity] - AnalyseActivity";
+	final static String TAG = "[AnalyseActivity]";
 	
 	static {
 		if(!OpenCVLoader.initDebug()){
@@ -83,18 +83,9 @@ public class AnalyseActivity extends Activity {
 			}
 		});
 		
-		findViewById(R.id.btnTestNext).setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				startActivityForResult(new Intent(AnalyseActivity.this, ShowAnalyse.class), 2);
-			}
-		});
-		
 		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);	
 		
-		// Display a list of logo
-		//TODO (gap between item to fix)
+		/** Display a list of logo **/
 		
 		// For each row in the list which stores logo and brand
         List<HashMap<String,String>> adapterList = new ArrayList<HashMap<String,String>>();
@@ -118,9 +109,11 @@ public class AnalyseActivity extends Activity {
         SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), adapterList, R.layout.listview, from, to);
  
         // Getting a reference to listview (composant) to apply the adapter
-        ((ListView) findViewById(R.id.listview_widget)).setAdapter(adapter);
+        ListView lv = null;
+        lv = ((ListView) findViewById(R.id.listview_widget));
+        lv.setAdapter(adapter);
         
-        ((ListView) findViewById(R.id.listview_widget)).setOnItemClickListener(new OnItemClickListener()
+        lv.setOnItemClickListener(new OnItemClickListener()
         {
             @Override 
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
@@ -154,7 +147,7 @@ public class AnalyseActivity extends Activity {
 	public void analyseScene(Mat srcGrayscale, int featureDetector, int descriptorExtractor)
 	{
 		// Creation of the detector
-		//TODO FeatureDetector.ORB to give to the method here (generic method also)
+		// FeatureDetector.ORB to give to the method here (generic method also)
 		FeatureDetector _detector = FeatureDetector.create(featureDetector);
 		// Creation of the descriptor
 		// DescriptorExtractor.ORB to give to the method here (generic method also)

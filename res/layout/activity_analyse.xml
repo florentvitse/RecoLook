@@ -46,7 +46,8 @@
 
             <TableLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                tools:ignore="UselessParent" >
 
                 <TableRow>
 
@@ -56,16 +57,6 @@
                         android:layout_height="wrap_content"
                         android:contentDescription="@+strings/contentImgView"
                         android:scaleType="fitStart" />
-                </TableRow>
-
-                <TableRow android:paddingTop="@dimen/activity_vertical_margin" >
-
-                    <Button
-                        android:id="@+id/btnTestNext"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="testOK" >
-                    </Button>
                 </TableRow>
             </TableLayout>
         </RelativeLayout>
@@ -84,13 +75,14 @@
 
             <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                tools:ignore="UselessParent" >
 
                 <ListView
                     android:id="@+id/listview_widget"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:dividerHeight="2dp"  />
+                    android:dividerHeight="2dp" />
             </RelativeLayout>
         </RelativeLayout>
     </TableRow>

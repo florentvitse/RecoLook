@@ -7,9 +7,7 @@
     <string name="btnPhoto">Prendre une photo</string>
     <string name="btnAnalyse">Analyser</string>
     <string name="contentImgView">Image</string>
-    <string name="title_activity_analyse">AnalyseActivity</string>
     <string name="btnReturn">Retour</string>
-    <string name="title_activity_show_analyse">ShowAnalyse</string>
     <string name="hello_world">Hello world!</string>
 
 </resources>
