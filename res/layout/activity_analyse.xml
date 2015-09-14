@@ -90,7 +90,7 @@
                     android:id="@+id/listview_widget"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:dividerHeight="0dp"  />
+                    android:dividerHeight="2dp"  />
             </RelativeLayout>
         </RelativeLayout>
     </TableRow>

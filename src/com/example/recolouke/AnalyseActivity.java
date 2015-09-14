@@ -1,31 +1,19 @@
 package com.example.recolouke;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
-import org.opencv.core.Scalar;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
-import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -193,7 +181,7 @@ public class AnalyseActivity extends Activity {
         //TODO Comparison
         
         matcher.match(_descriptors_object, _descriptors_scene, matches);
-        // Display in the logCat console (level WARN) the number of 'matches' the system thinks it have found
+        // Display in the logCat console (level ) the number of 'matches' the system thinks it have found
         Log.w(TAG, String.valueOf(matches.total()));
 		
        
