@@ -22,9 +22,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 public class AnalyseActivity extends Activity {
 
@@ -117,7 +120,16 @@ public class AnalyseActivity extends Activity {
         // Getting a reference to listview (composant) to apply the adapter
         ((ListView) findViewById(R.id.listview_widget)).setAdapter(adapter);
         
-        analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED), FeatureDetector.ORB, DescriptorExtractor.ORB);
+        ((ListView) findViewById(R.id.listview_widget)).setOnItemClickListener(new OnItemClickListener()
+        {
+            @Override 
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
+            { 
+                Toast.makeText(AnalyseActivity.this, "Item selected position : " + position, Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        // analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED), FeatureDetector.ORB, DescriptorExtractor.ORB);
 	}
 
 	@Override
