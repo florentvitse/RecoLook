@@ -1,14 +1,10 @@
 package com.example.recolouke;
 
-import java.io.File;
 import java.io.IOException;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.ExifInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.Menu;
@@ -100,7 +96,7 @@ public class MainActivity extends Activity {
 						// Error
 					}				
 				} else {
-					//ERROR
+					// Error
 				}
 				break;
 			case RETURN_ANALYSIS :
@@ -110,49 +106,7 @@ public class MainActivity extends Activity {
 			default : break;
 		}
 	}
-	
-	/*
-	public String getPath(Uri uri) 
-    {
-        String valR = null;
-		
-		String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null) 
-        {
-        	cursor.moveToFirst();
-        	valR = cursor.getString( cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA) );
-        }
-        cursor.close();
-        return valR;
-    }
-	
-	public int getCameraPhotoOrientation(Uri imagePath){
-	    int rotate = 0;
-	    try {
-	        File imageFile = new File(getPath(imagePath));
-	        
-	        ExifInterface exif = new ExifInterface(imageFile.getAbsolutePath());
-	        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
-	        switch (orientation) {
-		        case ExifInterface.ORIENTATION_ROTATE_90:
-		            rotate = 90;
-		            break;
-		        case ExifInterface.ORIENTATION_ROTATE_180:
-		            rotate = 180;
-		            break;
-		        case ExifInterface.ORIENTATION_ROTATE_270:
-		            rotate = 270;
-		            break;
-		        default: break;
-	        }
-	    } catch (Exception e) {
-	        //ERROR
-	    }
-	    return rotate;
-	}*/
-	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

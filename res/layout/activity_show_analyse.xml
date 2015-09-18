@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:visibility="gone" >
+        android:visibility="visible" >
 
         <RelativeLayout
             android:layout_width="0dp"
@@ -48,6 +48,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
                 android:contentDescription="@+strings/contentImgView"
                 android:scaleType="fitStart" />
         </RelativeLayout>
@@ -64,18 +65,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.48" >
 
-            <RelativeLayout
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:ignore="UselessParent" >
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@+strings/contentImgView"
-                    android:scaleType="fitStart"
-                    android:src="@drawable/amd" />
-            </RelativeLayout>
+                android:adjustViewBounds="true"
+                android:contentDescription="@+strings/contentImgView"
+                android:scaleType="fitStart"
+                android:src="@drawable/amd" />
         </RelativeLayout>
     </TableRow>
 
@@ -92,7 +88,6 @@
             android:indeterminate="false"
             android:max="100"
             android:progress="0" >
-
         </ProgressBar>
     </TableRow>
 
