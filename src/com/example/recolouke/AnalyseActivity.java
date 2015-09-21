@@ -1,27 +1,21 @@
 package com.example.recolouke;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
-import org.opencv.core.Scalar;
 import org.opencv.features2d.DMatch;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
-import org.opencv.features2d.Features2d;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -35,56 +29,27 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 public class AnalyseActivity extends Activity {
 
 	final static String TAG = "[AnalyseActivity]";
-	
+
 	static {
-		if(!OpenCVLoader.initDebug()){
+		if (!OpenCVLoader.initDebug()) {
 			// ERROR - Initialization Error
 			Log.e(TAG, "OpenCV - Initialization Error");
 		}
 	}
-	
+
 	private final int RETURN_SHOW_ANALYSIS = 500;
-	
-	// Array of strings storing brand names
-    String[] brands = new String[] {
-        "AMD",
-        "Auchan",
-        "BMW",
-        "Carrefour",
-        "Disney",
-        "E Leclerc",
-        "EA Sports",
-        "EDF",
-        "FedEx",
-        "KFC"
-    };
- 
-    // Array of references to images stored in /res/drawable-mdpi/
-    int[] logoIDs = new int[]{
-        R.drawable.amd,
-        R.drawable.auchan,
-        R.drawable.bmw,
-        R.drawable.carrefour,
-        R.drawable.disney,
-        R.drawable.e_leclerc,
-        R.drawable.ea_sports,
-        R.drawable.edf,
-        R.drawable.fedex,
-        R.drawable.kfc
-    };
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_analyse);
-		
+
 		findViewById(R.id.btnReturn).setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				Global.IMG_SELECTED = null;
@@ -92,51 +57,48 @@ public class AnalyseActivity extends Activity {
 				finish();
 			}
 		});
-		
-		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);	
-		
+
+		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);
+
 		/** Display a list of logo **/
-		
+
 		// For each row in the list which stores logo and brand
-        List<HashMap<String,String>> adapterList = new ArrayList<HashMap<String,String>>();
- 
-        for(int i = 0 ; i < brands.length; i++){
-            HashMap<String, String> hm = new HashMap<String,String>();
-            hm.put("brand", brands[i]);
-            hm.put("logo", String.valueOf(logoIDs[i]) );
-            adapterList.add(hm);
-        }
- 
-        // Keys used in Hashmap
-        String[] from = { "brand", "logo" };
- 
-        // Ids of views in listview layout
-        int[] to = { R.id.brand, R.id.logo };
- 
-        // Instantiating an adapter to store each items
-        // R.layout.listview defines the layout of each item
-        // We put one image and one string in each item
-        SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), adapterList, R.layout.listview, from, to);
- 
-        // Getting a reference to listview (composant) to apply the adapter
-        ListView lv = null;
-        lv = ((ListView) findViewById(R.id.listview_widget));
-        lv.setAdapter(adapter);
-        
-        lv.setOnItemClickListener(new OnItemClickListener()
-        {
-            @Override 
-            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
-            { 
-                Toast.makeText(AnalyseActivity.this, "Item selected position : " + position, Toast.LENGTH_SHORT).show();
-                /*Intent _showAnalyse = new Intent(AnalyseActivity.this, AnalyseActivity.class);
-                _showAnalyse.putExtra("position", position);
-                _showAnalyse.putExtra("imgSelected", Global.IMG_SELECTED);
-                startActivityForResult(_showAnalyse, RETURN_SHOW_ANALYSIS);*/
-            }
-        });
-        
-        analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED), FeatureDetector.ORB, DescriptorExtractor.ORB);
+		List<HashMap<String, String>> adapterList = new ArrayList<HashMap<String, String>>();
+
+		for (int i = 0; i < Global.brands.length; i++) {
+			HashMap<String, String> hm = new HashMap<String, String>();
+			hm.put("brand", Global.brands[i]);
+			hm.put("logo", String.valueOf(Global.logoIDs[i]));
+			adapterList.add(hm);
+		}
+
+		// Keys used in Hashmap
+		String[] from = { "brand", "logo" };
+
+		// Ids of views in listview layout
+		int[] to = { R.id.brand, R.id.logo };
+
+		// Instantiating an adapter to store each items
+		// R.layout.listview defines the layout of each item
+		// We put one image and one string in each item
+		SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), adapterList, R.layout.listview, from, to);
+
+		// Getting a reference to listview (composant) to apply the adapter
+		ListView lv = null;
+		lv = ((ListView) findViewById(R.id.listview_widget));
+		lv.setAdapter(adapter);
+
+		lv.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+				Intent _showAnalyse = new Intent(AnalyseActivity.this, ShowAnalyse.class);
+				_showAnalyse.putExtra("position", position);
+				startActivityForResult(_showAnalyse, RETURN_SHOW_ANALYSIS);
+			}
+		});
+
+		// analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED),
+		// FeatureDetector.ORB, DescriptorExtractor.ORB);
 	}
 
 	@Override
@@ -157,108 +119,109 @@ public class AnalyseActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
-	public void analyseScene(Mat srcGrayscale, int featureDetector, int descriptorExtractor)
-	{
+
+	public void analyseScene(Mat srcGrayscale, int featureDetector, int descriptorExtractor) {
 		// Creation of the detector
 		// FeatureDetector.ORB to give to the method here (generic method also)
 		FeatureDetector _detector = FeatureDetector.create(featureDetector);
 		// Creation of the descriptor
-		// DescriptorExtractor.ORB to give to the method here (generic method also)
+		// DescriptorExtractor.ORB to give to the method here (generic method
+		// also)
 		DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
 		// Creation of the matcher
 		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
 		// Vector of matches
 		MatOfDMatch matches = new MatOfDMatch();
-		
+
 		// Object that will store the keypoint of the scene
 		MatOfKeyPoint _scenekeypoints = new MatOfKeyPoint();
 		// Detection of the keyPoints of the scene
 		_detector.detect(srcGrayscale, _scenekeypoints);
-		
+
 		Log.w(TAG, "**** Number of keypoints (scene)");
 		Log.w(TAG, String.valueOf(_scenekeypoints.rows()));
-		
+
 		Mat _descriptors_scene = new Mat();
 		// Extraction of the descriptors
-        _descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
+		_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
 
 		Log.w(TAG, "**** Number of descriptor (scene)");
 		Log.w(TAG, String.valueOf(_descriptors_scene.rows()));
-		
-        // Object for the object image
+
+		// Object for the object image
 		MatOfKeyPoint _objectkeypoints = new MatOfKeyPoint();
-		
+
 		// Get a Bitmap logo to compare
-		Uri drawableUri = ImageUtility.getDrawableUri(this, logoIDs[0]);
+		Uri drawableUri = ImageUtility.getDrawableUri(this, Global.logoIDs[0]);
 		Mat objToCompare = null;
 		try {
-			objToCompare = ImageUtility.convertToGrayscaleMat(MediaStore.Images.Media.getBitmap(getContentResolver(), drawableUri));
+			objToCompare = ImageUtility
+					.convertToGrayscaleMat(MediaStore.Images.Media.getBitmap(getContentResolver(), drawableUri));
 		} catch (Exception e) {
 			// Error
 		}
 		_detector.detect(objToCompare, _objectkeypoints);
-		
+
 		Log.w(TAG, "**** Number of keypoints (object)");
 		Log.w(TAG, String.valueOf(_objectkeypoints.rows()));
-		
+
 		Mat _descriptors_object = new Mat();
-        _descriptor.compute(objToCompare, _objectkeypoints, _descriptors_object);
+		_descriptor.compute(objToCompare, _objectkeypoints, _descriptors_object);
 
 		Log.w(TAG, "**** Number of descriptor (object)");
 		Log.w(TAG, String.valueOf(_descriptors_object.rows()));
-        
-        // Comparison      
-        matcher.match(_descriptors_object, _descriptors_scene, matches);
-        
-        Log.w(TAG, "**** Number of matches");
-        Log.w(TAG, String.valueOf(matches.rows()));
-		
-    	// Méthode rapide pour calculer la distance max et min entre points d'intérêt  
-    	double max_dist = 0; double min_dist = 100;
-    	DMatch[] matchesArray = matches.toArray();
-    	for (int i = 0; i < _descriptors_object.rows(); i++)
-    	{
-    		double dist = matchesArray[i].distance;
-    		if (dist < min_dist) min_dist = dist;
-    		if (dist > max_dist) max_dist = dist;
-    	}
-    	
-    	Log.w(TAG + "max_dist ", String.valueOf(max_dist));
-    	Log.w(TAG + "min_dist ", String.valueOf(min_dist));
 
-    	// Les "bons" appariements (i.e. leur distance est < 3*min_dist )  
-    	LinkedList<DMatch> goodMatchesArray = new LinkedList<DMatch>();
+		// Comparison
+		matcher.match(_descriptors_object, _descriptors_scene, matches);
 
-    	for (int i = 0; i < _descriptors_object.rows(); i++)
-    	{
-    		if (matchesArray[i].distance < 2 * min_dist)
-    		{
-    			goodMatchesArray.add(matchesArray[i]);
-    		}
-    	}
-    	
-        Log.w(TAG, "**** Number of good matches");
-        Log.w(TAG, String.valueOf(goodMatchesArray.size()));		
-		
-        /*Mat featuredImg = new Mat();
-        Scalar kpColor = new Scalar(255,159,10);//this will be color of keypoints
-        //featuredImg will be the output of first image
-        Features2d.drawKeypoints(objToCompare, _objectkeypoints, featuredImg , kpColor, 0);
+		Log.w(TAG, "**** Number of matches");
+		Log.w(TAG, String.valueOf(matches.rows()));
 
-        Bitmap a = null;
-		try {
-			a = MediaStore.Images.Media.getBitmap(getContentResolver(), drawableUri);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		// Méthode rapide pour calculer la distance max et min entre points
+		// d'intérêt
+		double max_dist = 0;
+		double min_dist = 100;
+		DMatch[] matchesArray = matches.toArray();
+		for (int i = 0; i < _descriptors_object.rows(); i++) {
+			double dist = matchesArray[i].distance;
+			if (dist < min_dist)
+				min_dist = dist;
+			if (dist > max_dist)
+				max_dist = dist;
 		}
-        Bitmap imageMatched = Bitmap.createBitmap(a.getWidth() , a.getHeight(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(featuredImg, Global.IMG_SELECTED);
-         ((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);*/
-        
-	}	
+
+		Log.w(TAG + "max_dist ", String.valueOf(max_dist));
+		Log.w(TAG + "min_dist ", String.valueOf(min_dist));
+
+		// Les "bons" appariements (i.e. leur distance est < 3*min_dist )
+		LinkedList<DMatch> goodMatchesArray = new LinkedList<DMatch>();
+
+		for (int i = 0; i < _descriptors_object.rows(); i++) {
+			if (matchesArray[i].distance < 2 * min_dist) {
+				goodMatchesArray.add(matchesArray[i]);
+			}
+		}
+
+		Log.w(TAG, "**** Number of good matches");
+		Log.w(TAG, String.valueOf(goodMatchesArray.size()));
+
+		/*
+		 * Mat featuredImg = new Mat(); Scalar kpColor = new
+		 * Scalar(255,159,10);//this will be color of keypoints //featuredImg
+		 * will be the output of first image
+		 * Features2d.drawKeypoints(objToCompare, _objectkeypoints, featuredImg
+		 * , kpColor, 0);
+		 * 
+		 * Bitmap a = null; try { a =
+		 * MediaStore.Images.Media.getBitmap(getContentResolver(), drawableUri);
+		 * } catch (FileNotFoundException e) { // TODO Auto-generated catch
+		 * block e.printStackTrace(); } catch (IOException e) { // TODO
+		 * Auto-generated catch block e.printStackTrace(); } Bitmap imageMatched
+		 * = Bitmap.createBitmap(a.getWidth() , a.getHeight(),
+		 * Bitmap.Config.RGB_565); Utils.matToBitmap(featuredImg,
+		 * Global.IMG_SELECTED); ((ImageView)
+		 * findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);
+		 */
+
+	}
 }

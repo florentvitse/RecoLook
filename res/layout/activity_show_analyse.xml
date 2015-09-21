@@ -46,6 +46,7 @@
             android:layout_weight="0.48" >
 
             <ImageView
+                android:id="@+id/imgAnalyzed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
@@ -66,12 +67,12 @@
             android:layout_weight="0.48" >
 
             <ImageView
+                android:id="@+id/imgReferenceSelected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:contentDescription="@+strings/contentImgView"
-                android:scaleType="fitStart"
-                android:src="@drawable/amd" />
+                android:scaleType="fitStart"/>
         </RelativeLayout>
     </TableRow>
 

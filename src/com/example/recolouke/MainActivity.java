@@ -18,31 +18,31 @@ public class MainActivity extends Activity {
 	final int RESULT_CAMERA = 200;
 	final int RESULT_ACCESS_GALLERY = 300;
 	final int RETURN_ANALYSIS = 400;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		findViewById(R.id.btnPhoto).setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				startCaptureActivity();
-				
+
 			}
 		});
-		
+
 		findViewById(R.id.btnGallery).setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				startGalleryActivity();
 			}
 		});
-		
+
 		findViewById(R.id.btnAnalyse).setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				startComparisonActivity();
@@ -53,57 +53,51 @@ public class MainActivity extends Activity {
 	private void startCaptureActivity() {
 		startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), RESULT_CAMERA);
 	}
-	
 
 	private void startGalleryActivity() {
 		startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), RESULT_ACCESS_GALLERY);
 	}
-	
 
 	private void startComparisonActivity() {
 		startActivityForResult(new Intent(MainActivity.this, AnalyseActivity.class), RETURN_ANALYSIS);
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		
-		switch(requestCode)
-		{
-			case RESULT_CAMERA :
-				if(resultCode == RESULT_OK)
-				{
-					Global.IMG_SELECTED = ((Bitmap) data.getExtras().get("data"));
-					((ImageView) findViewById(R.id.imgView))
-						.setImageBitmap(Global.IMG_SELECTED);
+
+		switch (requestCode) {
+		case RESULT_CAMERA:
+			if (resultCode == RESULT_OK) {
+				Global.IMG_SELECTED = ((Bitmap) data.getExtras().get("data"));
+				((ImageView) findViewById(R.id.imgView)).setImageBitmap(Global.IMG_SELECTED);
+				findViewById(R.id.btnAnalyse).setVisibility(View.VISIBLE);
+			} else {
+				// Error
+			}
+			break;
+		case RESULT_ACCESS_GALLERY:
+			if (resultCode == RESULT_OK) {
+				// Récupére le fichier image correspondant
+				try {
+					Global.IMG_SELECTED = ImageUtility.RotateBitmap(
+							MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData()),
+							ImageUtility.getCameraPhotoOrientation(this, data.getData()));
+					((ImageView) findViewById(R.id.imgView)).setImageBitmap(Global.IMG_SELECTED);
 					findViewById(R.id.btnAnalyse).setVisibility(View.VISIBLE);
-				} else {
-					//ERROR
-				}
-				break;
-			case RESULT_ACCESS_GALLERY :
-				if(resultCode == RESULT_OK)
-				{
-					// Récupére le fichier image correspondant
-					try {
-						Global.IMG_SELECTED = ImageUtility.RotateBitmap(
-								MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData())
-								,ImageUtility.getCameraPhotoOrientation(this, data.getData()));
-						((ImageView) findViewById(R.id.imgView))
-							.setImageBitmap(Global.IMG_SELECTED);
-						findViewById(R.id.btnAnalyse).setVisibility(View.VISIBLE);
-					} catch (IOException e) {
-						// Error
-					}				
-				} else {
+				} catch (IOException e) {
 					// Error
 				}
-				break;
-			case RETURN_ANALYSIS :
-				((ImageView) findViewById(R.id.imgView)).setImageBitmap(null);
-				findViewById(R.id.btnAnalyse).setVisibility(View.INVISIBLE);
-				break;
-			default : break;
+			} else {
+				// Error
+			}
+			break;
+		case RETURN_ANALYSIS:
+			((ImageView) findViewById(R.id.imgView)).setImageBitmap(null);
+			findViewById(R.id.btnAnalyse).setVisibility(View.INVISIBLE);
+			break;
+		default:
+			break;
 		}
 	}
 

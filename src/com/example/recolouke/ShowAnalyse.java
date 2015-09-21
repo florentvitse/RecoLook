@@ -6,6 +6,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 public class ShowAnalyse extends Activity {
 
@@ -13,15 +15,34 @@ public class ShowAnalyse extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_show_analyse);
-		
+
 		findViewById(R.id.btnReturnShowAnalyse).setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				setResult(RESULT_OK, null);
 				finish();
 			}
 		});
+
+		((ImageView) findViewById(R.id.imgAnalyzed)).setImageBitmap(Global.IMG_SELECTED);
+
+		// Get the position of the image clicked in the previous list
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			int position = extras.getInt("position");
+			// Display a toast
+			Toast.makeText(ShowAnalyse.this, "Item selected position : " + String.valueOf(position), Toast.LENGTH_SHORT)
+					.show();
+
+			try {
+				((ImageView) findViewById(R.id.imgReferenceSelected))
+						.setImageBitmap(ImageUtility.getDrawableBitmap(this, position));
+			} catch (Exception e) {
+				// Error
+			}
+
+		}
 	}
 
 	@Override
