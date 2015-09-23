@@ -16,9 +16,7 @@ import org.opencv.features2d.FeatureDetector;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -97,8 +95,10 @@ public class AnalyseActivity extends Activity {
 			}
 		});
 
-		// analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED),
-		// FeatureDetector.ORB, DescriptorExtractor.ORB);
+		 analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED),
+		 FeatureDetector.ORB,
+		 DescriptorExtractor.ORB,
+		 9);
 	}
 
 	@Override
@@ -120,10 +120,10 @@ public class AnalyseActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void analyseScene(Mat srcGrayscale, int featureDetector, int descriptorExtractor) {
+	public void analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor, int position) {
 		// Creation of the detector
 		// FeatureDetector.ORB to give to the method here (generic method also)
-		FeatureDetector _detector = FeatureDetector.create(featureDetector);
+		FeatureDetector _detector = FeatureDetector.create(detector);
 		// Creation of the descriptor
 		// DescriptorExtractor.ORB to give to the method here (generic method
 		// also)
@@ -138,52 +138,50 @@ public class AnalyseActivity extends Activity {
 		// Detection of the keyPoints of the scene
 		_detector.detect(srcGrayscale, _scenekeypoints);
 
-		Log.w(TAG, "**** Number of keypoints (scene)");
-		Log.w(TAG, String.valueOf(_scenekeypoints.rows()));
+		Log.w(TAG, "* Number of keypoints (scene) *");
+		Log.w(TAG, String.valueOf(_scenekeypoints.size()));
 
 		Mat _descriptors_scene = new Mat();
 		// Extraction of the descriptors
 		_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
 
-		Log.w(TAG, "**** Number of descriptor (scene)");
-		Log.w(TAG, String.valueOf(_descriptors_scene.rows()));
+		Log.w(TAG, "* Number of descriptor (scene) *");
+		Log.w(TAG, String.valueOf(_descriptors_scene.size()));
 
 		// Object for the object image
 		MatOfKeyPoint _objectkeypoints = new MatOfKeyPoint();
 
 		// Get a Bitmap logo to compare
-		Uri drawableUri = ImageUtility.getDrawableUri(this, Global.logoIDs[0]);
-		Mat objToCompare = null;
+		Mat objToCompare = new Mat();
 		try {
 			objToCompare = ImageUtility
-					.convertToGrayscaleMat(MediaStore.Images.Media.getBitmap(getContentResolver(), drawableUri));
+					.convertToGrayscaleMat(ImageUtility.getDrawableBitmap(this, position));
 		} catch (Exception e) {
 			// Error
 		}
 		_detector.detect(objToCompare, _objectkeypoints);
 
-		Log.w(TAG, "**** Number of keypoints (object)");
-		Log.w(TAG, String.valueOf(_objectkeypoints.rows()));
+		Log.w(TAG, "* Number of keypoints (object) *");
+		Log.w(TAG, String.valueOf(_objectkeypoints.size()));
 
 		Mat _descriptors_object = new Mat();
 		_descriptor.compute(objToCompare, _objectkeypoints, _descriptors_object);
 
-		Log.w(TAG, "**** Number of descriptor (object)");
-		Log.w(TAG, String.valueOf(_descriptors_object.rows()));
+		Log.w(TAG, "* Number of descriptor (object) *");
+		Log.w(TAG, String.valueOf(_descriptors_object.size()));
 
 		// Comparison
 		matcher.match(_descriptors_object, _descriptors_scene, matches);
 
-		Log.w(TAG, "**** Number of matches");
-		Log.w(TAG, String.valueOf(matches.rows()));
+		Log.w(TAG, "* Number of matches *");
+		Log.w(TAG, String.valueOf(matches.size()));
 
-		// Méthode rapide pour calculer la distance max et min entre points
-		// d'intérêt
+		// Méthode rapide pour calculer la distance max et min entre points d'intérêt
 		double max_dist = 0;
 		double min_dist = 100;
-		DMatch[] matchesArray = matches.toArray();
-		for (int i = 0; i < _descriptors_object.rows(); i++) {
-			double dist = matchesArray[i].distance;
+		List<DMatch> matchesList = matches.toList();
+		for (DMatch el : matchesList) {
+			double dist = el.distance;
 			if (dist < min_dist)
 				min_dist = dist;
 			if (dist > max_dist)
@@ -196,13 +194,13 @@ public class AnalyseActivity extends Activity {
 		// Les "bons" appariements (i.e. leur distance est < 3*min_dist )
 		LinkedList<DMatch> goodMatchesArray = new LinkedList<DMatch>();
 
-		for (int i = 0; i < _descriptors_object.rows(); i++) {
-			if (matchesArray[i].distance < 2 * min_dist) {
-				goodMatchesArray.add(matchesArray[i]);
+		for (DMatch el : matchesList) {
+			if (el.distance < 3 * min_dist) {
+				goodMatchesArray.add(el);
 			}
 		}
 
-		Log.w(TAG, "**** Number of good matches");
+		Log.w(TAG, "* Number of good matches *");
 		Log.w(TAG, String.valueOf(goodMatchesArray.size()));
 
 		/*

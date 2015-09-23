@@ -49,8 +49,8 @@ containing a value of this type.
     }
     public static final class drawable {
         public static final int amd=0x7f020000;
-        public static final int auchan=0x7f020001;
-        public static final int bmw=0x7f020002;
+        public static final int arsenal=0x7f020001;
+        public static final int auchan=0x7f020002;
         public static final int carrefour=0x7f020003;
         public static final int disney=0x7f020004;
         public static final int e_leclerc=0x7f020005;

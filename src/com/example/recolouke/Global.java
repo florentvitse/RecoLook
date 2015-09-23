@@ -7,13 +7,13 @@ public class Global extends Application {
 
 	static Bitmap IMG_SELECTED = null;
 	
-	/* STATIC RESSOURCES FOR PROJECT DEVLOPMENT */
+	/* STATIC RESSOURCES FOR PROJECT DEVELOPMENT */
 	
 	// Array of strings storing brand names
     static String[] brands = new String[] {
         "AMD",
+        "Arsenal",
         "Auchan",
-        "BMW",
         "Carrefour",
         "Starbucks Coffee",
         "Nike",
@@ -26,8 +26,8 @@ public class Global extends Application {
     // Array of references to images stored in /res/drawable-mdpi/
     static int[] logoIDs = new int[]{
         R.drawable.amd,
+        R.drawable.arsenal,
         R.drawable.auchan,
-        R.drawable.bmw,
         R.drawable.carrefour,
         R.drawable.starbucks,
         R.drawable.nike,

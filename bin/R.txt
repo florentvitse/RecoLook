@@ -3,8 +3,8 @@ int attr show_fps 0x7f010000
 int dimen activity_horizontal_margin 0x7f040000
 int dimen activity_vertical_margin 0x7f040001
 int drawable amd 0x7f020000
-int drawable auchan 0x7f020001
-int drawable bmw 0x7f020002
+int drawable arsenal 0x7f020001
+int drawable auchan 0x7f020002
 int drawable carrefour 0x7f020003
 int drawable disney 0x7f020004
 int drawable e_leclerc 0x7f020005
