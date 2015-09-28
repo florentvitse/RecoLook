@@ -7,10 +7,10 @@ int drawable arsenal 0x7f020001
 int drawable burger_king 0x7f020002
 int drawable disney 0x7f020003
 int drawable e_leclerc 0x7f020004
-int drawable ea_sports 0x7f020005
-int drawable facebook 0x7f020006
-int drawable fedex 0x7f020007
-int drawable fff 0x7f020008
+int drawable facebook 0x7f020005
+int drawable fedex 0x7f020006
+int drawable fff 0x7f020007
+int drawable hp 0x7f020008
 int drawable ic_launcher 0x7f020009
 int drawable kfc 0x7f02000a
 int drawable lidl 0x7f02000b

@@ -53,10 +53,10 @@ containing a value of this type.
         public static final int burger_king=0x7f020002;
         public static final int disney=0x7f020003;
         public static final int e_leclerc=0x7f020004;
-        public static final int ea_sports=0x7f020005;
-        public static final int facebook=0x7f020006;
-        public static final int fedex=0x7f020007;
-        public static final int fff=0x7f020008;
+        public static final int facebook=0x7f020005;
+        public static final int fedex=0x7f020006;
+        public static final int fff=0x7f020007;
+        public static final int hp=0x7f020008;
         public static final int ic_launcher=0x7f020009;
         public static final int kfc=0x7f02000a;
         public static final int lidl=0x7f02000b;

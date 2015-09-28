@@ -16,9 +16,9 @@ public class Global extends Application {
         "Burger King",
         "Starbucks Coffee",
         "Nike",
-        "EA Sports",
         "Facebook",
         "FedEx",
+        "Hewlett Packard",
         "KFC"
     };
  
@@ -29,9 +29,9 @@ public class Global extends Application {
         R.drawable.burger_king,
         R.drawable.starbucks,
         R.drawable.nike,
-        R.drawable.ea_sports,
         R.drawable.facebook,
         R.drawable.fedex,
+        R.drawable.hp,
         R.drawable.kfc
     };
 }
