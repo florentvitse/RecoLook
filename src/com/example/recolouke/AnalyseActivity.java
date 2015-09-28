@@ -18,6 +18,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -146,7 +147,7 @@ public class AnalyseActivity extends Activity {
 		Log.w(TAG, "* Number of descriptor (scene) *");
 		Log.w(TAG, String.valueOf(_descriptors_scene.size()));
 
-		HashMap<Integer, Integer> resultComparator = new HashMap<Integer, Integer>();
+		SparseIntArray resultComparator = new SparseIntArray();
 		
 		for (int logo : Global.logoIDs) {
 
@@ -189,46 +190,27 @@ public class AnalyseActivity extends Activity {
 			//Log.w(TAG, "* Number of matches *");
 			//Log.w(TAG, String.valueOf(matches.size()));
 
-			// Méthode rapide pour calculer la distance max et min entre points
-			// d'intérêt
-			double max_dist = 0;
-			double min_dist = 100;
 			List<DMatch> matchesList = matches.toList();
-			for (DMatch el : matchesList) {
-				double dist = el.distance;
-				if (dist < min_dist)
-					min_dist = dist;
-				if (dist > max_dist)
-					max_dist = dist;
-			}
 
-			//Log.w(TAG + "max_dist ", String.valueOf(max_dist));
-			//Log.w(TAG + "min_dist ", String.valueOf(min_dist));
-
-			// Les "bons" appariements (i.e. leur distance est < 3*min_dist )
+			// Les "bons" appariements (i.e. leur distance est < 60 )
 			LinkedList<DMatch> goodMatchesArray = new LinkedList<DMatch>();
 
 			for (DMatch el : matchesList) {
 				
-				if(el.distance < 50.0)
+				if(el.distance < 60f)
 				{
 					goodMatchesArray.add(el);
 				}
-				
-				/*
-				if (el.distance < 3 * min_dist) {
-					goodMatchesArray.add(el);
-				}
-				*/
 			}
 
 			Log.w(TAG, "* Number of good matches *");
 			Log.w(TAG, String.valueOf(goodMatchesArray.size()));
 			
-			resultComparator.put(logo, goodMatchesArray.size());
+			resultComparator.append(logo, goodMatchesArray.size());
 		}
 		
-		Log.i(TAG, resultComparator.size() + " images comparées");
+		Log.w(TAG, resultComparator.size() + " images comparées");
+		Log.w(TAG, resultComparator.toString());
 
 		/*
 		 * Mat featuredImg = new Mat(); Scalar kpColor = new

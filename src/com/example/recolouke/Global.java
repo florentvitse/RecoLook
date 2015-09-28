@@ -13,12 +13,11 @@ public class Global extends Application {
     static String[] brands = new String[] {
         "AMD",
         "Arsenal",
-        "Auchan",
-        "Carrefour",
+        "Burger King",
         "Starbucks Coffee",
         "Nike",
         "EA Sports",
-        "EDF",
+        "Facebook",
         "FedEx",
         "KFC"
     };
@@ -27,12 +26,11 @@ public class Global extends Application {
     static int[] logoIDs = new int[]{
         R.drawable.amd,
         R.drawable.arsenal,
-        R.drawable.auchan,
-        R.drawable.carrefour,
+        R.drawable.burger_king,
         R.drawable.starbucks,
         R.drawable.nike,
         R.drawable.ea_sports,
-        R.drawable.edf,
+        R.drawable.facebook,
         R.drawable.fedex,
         R.drawable.kfc
     };

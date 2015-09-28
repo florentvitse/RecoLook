@@ -50,23 +50,22 @@ containing a value of this type.
     public static final class drawable {
         public static final int amd=0x7f020000;
         public static final int arsenal=0x7f020001;
-        public static final int auchan=0x7f020002;
-        public static final int carrefour=0x7f020003;
-        public static final int disney=0x7f020004;
-        public static final int e_leclerc=0x7f020005;
-        public static final int ea_sports=0x7f020006;
-        public static final int edf=0x7f020007;
-        public static final int fedex=0x7f020008;
-        public static final int fff=0x7f020009;
-        public static final int ic_launcher=0x7f02000a;
-        public static final int kfc=0x7f02000b;
-        public static final int lidl=0x7f02000c;
-        public static final int nike=0x7f02000d;
-        public static final int orange=0x7f02000e;
-        public static final int progress=0x7f02000f;
-        public static final int progress_background=0x7f020010;
-        public static final int starbucks=0x7f020011;
-        public static final int telecom_lille=0x7f020012;
+        public static final int burger_king=0x7f020002;
+        public static final int disney=0x7f020003;
+        public static final int e_leclerc=0x7f020004;
+        public static final int ea_sports=0x7f020005;
+        public static final int facebook=0x7f020006;
+        public static final int fedex=0x7f020007;
+        public static final int fff=0x7f020008;
+        public static final int ic_launcher=0x7f020009;
+        public static final int kfc=0x7f02000a;
+        public static final int lidl=0x7f02000b;
+        public static final int nike=0x7f02000c;
+        public static final int orange=0x7f02000d;
+        public static final int progress=0x7f02000e;
+        public static final int progress_background=0x7f02000f;
+        public static final int starbucks=0x7f020010;
+        public static final int telecom_lille=0x7f020011;
     }
     public static final class id {
         public static final int action_settings=0x7f080013;
