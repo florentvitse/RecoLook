@@ -30,7 +30,7 @@ import android.widget.SimpleAdapter;
 
 public class AnalyseActivity extends Activity {
 
-	final static String TAG = "[AnalyseActivity]";
+	final static String TAG = "AnalyseActivity";
 
 	static {
 		if (!OpenCVLoader.initDebug()) {
@@ -95,10 +95,8 @@ public class AnalyseActivity extends Activity {
 			}
 		});
 
-		 analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED),
-		 FeatureDetector.ORB,
-		 DescriptorExtractor.ORB,
-		 9);
+		analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED), FeatureDetector.ORB,
+				DescriptorExtractor.ORB);
 	}
 
 	@Override
@@ -120,7 +118,7 @@ public class AnalyseActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor, int position) {
+	public void analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
 		// Creation of the detector
 		// FeatureDetector.ORB to give to the method here (generic method also)
 		FeatureDetector _detector = FeatureDetector.create(detector);
@@ -148,60 +146,89 @@ public class AnalyseActivity extends Activity {
 		Log.w(TAG, "* Number of descriptor (scene) *");
 		Log.w(TAG, String.valueOf(_descriptors_scene.size()));
 
-		// Object for the object image
-		MatOfKeyPoint _objectkeypoints = new MatOfKeyPoint();
+		HashMap<Integer, Integer> resultComparator = new HashMap<Integer, Integer>();
+		
+		for (int logo : Global.logoIDs) {
 
-		// Get a Bitmap logo to compare
-		Mat objToCompare = new Mat();
-		try {
-			objToCompare = ImageUtility
-					.convertToGrayscaleMat(ImageUtility.getDrawableBitmap(this, position));
-		} catch (Exception e) {
-			// Error
-		}
-		_detector.detect(objToCompare, _objectkeypoints);
+			// Object for the object image
+			MatOfKeyPoint _objectkeypoints = new MatOfKeyPoint();
 
-		Log.w(TAG, "* Number of keypoints (object) *");
-		Log.w(TAG, String.valueOf(_objectkeypoints.size()));
-
-		Mat _descriptors_object = new Mat();
-		_descriptor.compute(objToCompare, _objectkeypoints, _descriptors_object);
-
-		Log.w(TAG, "* Number of descriptor (object) *");
-		Log.w(TAG, String.valueOf(_descriptors_object.size()));
-
-		// Comparison
-		matcher.match(_descriptors_object, _descriptors_scene, matches);
-
-		Log.w(TAG, "* Number of matches *");
-		Log.w(TAG, String.valueOf(matches.size()));
-
-		// Méthode rapide pour calculer la distance max et min entre points d'intérêt
-		double max_dist = 0;
-		double min_dist = 100;
-		List<DMatch> matchesList = matches.toList();
-		for (DMatch el : matchesList) {
-			double dist = el.distance;
-			if (dist < min_dist)
-				min_dist = dist;
-			if (dist > max_dist)
-				max_dist = dist;
-		}
-
-		Log.w(TAG + "max_dist ", String.valueOf(max_dist));
-		Log.w(TAG + "min_dist ", String.valueOf(min_dist));
-
-		// Les "bons" appariements (i.e. leur distance est < 3*min_dist )
-		LinkedList<DMatch> goodMatchesArray = new LinkedList<DMatch>();
-
-		for (DMatch el : matchesList) {
-			if (el.distance < 3 * min_dist) {
-				goodMatchesArray.add(el);
+			// Get a Bitmap logo to compare
+			Mat objToCompare = new Mat();
+			try {
+				objToCompare = ImageUtility.convertToGrayscaleMat(ImageUtility.getDrawableBitmap(this, logo));
+			} catch (Exception e) {
+				// Impossible error except if the memory become unreacheable
 			}
-		}
+			_detector.detect(objToCompare, _objectkeypoints);
 
-		Log.w(TAG, "* Number of good matches *");
-		Log.w(TAG, String.valueOf(goodMatchesArray.size()));
+			//Log.w(TAG, "* Number of keypoints (object) *");
+			//Log.w(TAG, String.valueOf(_objectkeypoints.size()));
+
+			Mat _descriptors_object = new Mat();
+			_descriptor.compute(objToCompare, _objectkeypoints, _descriptors_object);
+
+			/*
+			 * DESCRIPTOR FILE TEST
+			 * 
+			 * MatFileStorage xmlDescriptor = new MatFileStorage();
+			 * xmlDescriptor.create("FILEPATH MAC"); try {
+			 * xmlDescriptor.writeMat("DescriptorXML", _descriptors_object);
+			 * xmlDescriptor.release(); } catch (Exception e) { Log.e(TAG,
+			 * e.getMessage()); }
+			 * 
+			 * /* END - DESCRIPTOR FILE TEST
+			 */
+
+			//Log.w(TAG, "* Number of descriptor (object) *");
+			//Log.w(TAG, String.valueOf(_descriptors_object.size()));
+
+			// Comparison
+			matcher.match(_descriptors_object, _descriptors_scene, matches);
+
+			//Log.w(TAG, "* Number of matches *");
+			//Log.w(TAG, String.valueOf(matches.size()));
+
+			// Méthode rapide pour calculer la distance max et min entre points
+			// d'intérêt
+			double max_dist = 0;
+			double min_dist = 100;
+			List<DMatch> matchesList = matches.toList();
+			for (DMatch el : matchesList) {
+				double dist = el.distance;
+				if (dist < min_dist)
+					min_dist = dist;
+				if (dist > max_dist)
+					max_dist = dist;
+			}
+
+			//Log.w(TAG + "max_dist ", String.valueOf(max_dist));
+			//Log.w(TAG + "min_dist ", String.valueOf(min_dist));
+
+			// Les "bons" appariements (i.e. leur distance est < 3*min_dist )
+			LinkedList<DMatch> goodMatchesArray = new LinkedList<DMatch>();
+
+			for (DMatch el : matchesList) {
+				
+				if(el.distance < 50.0)
+				{
+					goodMatchesArray.add(el);
+				}
+				
+				/*
+				if (el.distance < 3 * min_dist) {
+					goodMatchesArray.add(el);
+				}
+				*/
+			}
+
+			Log.w(TAG, "* Number of good matches *");
+			Log.w(TAG, String.valueOf(goodMatchesArray.size()));
+			
+			resultComparator.put(logo, goodMatchesArray.size());
+		}
+		
+		Log.i(TAG, resultComparator.size() + " images comparées");
 
 		/*
 		 * Mat featuredImg = new Mat(); Scalar kpColor = new

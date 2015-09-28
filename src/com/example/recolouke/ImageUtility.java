@@ -19,6 +19,8 @@ import android.net.Uri;
 import android.provider.MediaStore;
 
 public class ImageUtility extends Application {
+	
+	final static String TAG = "ImageUtility";
 
 	public static String getPath(Context ctx, Uri uri) {
 		String valR = null;
@@ -110,8 +112,8 @@ public class ImageUtility extends Application {
 		return imageUri;
 	}
 
-	public static Bitmap getDrawableBitmap(Context ctx, int position) {
-		Uri drawableUri = ImageUtility.getDrawableUri(ctx, Global.logoIDs[position]);
+	public static Bitmap getDrawableBitmap(Context ctx, int logo) {
+		Uri drawableUri = ImageUtility.getDrawableUri(ctx, logo);
 		try {
 			return MediaStore.Images.Media.getBitmap(ctx.getContentResolver(), drawableUri);
 		} catch (Exception e) {
