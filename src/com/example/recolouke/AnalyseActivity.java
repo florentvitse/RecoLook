@@ -43,7 +43,7 @@ public class AnalyseActivity extends Activity {
 		}
 	}
 
-	private final int RETURN_SHOW_ANALYSIS = 500;
+	private Integer[] displayedDrawables = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,46 +63,47 @@ public class AnalyseActivity extends Activity {
 		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);
 
 		/** Construct the list of logo **/
+		displayedDrawables = new Integer[Global.MAX_RESULT_DISPLAYED];
 		HashMap<Integer, Integer> resultComparator = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED),
 				FeatureDetector.ORB,
 				DescriptorExtractor.ORB);
 		
-		// For each row in the list which stores logo and brand
-		List<HashMap<String, String>> adapterList = new ArrayList<HashMap<String, String>>();
-		int lastMax = 1000;
-		
-		for (int i = 0; i < Global.MAX_RESULT_DISPLAYED; i++) {
-			HashMap<String, String> hm = new HashMap<String, String>();
-			int oneEntry = getMax(resultComparator, lastMax);
-			hm.put("logo", String.valueOf(oneEntry));
-			lastMax = resultComparator.get(oneEntry);
-			
-			hm.put("brand", Global.brands[Global.getPositionLogo(oneEntry)]);
-			adapterList.add(hm);
-		}
-
 		// Keys used in Hashmap
 		String[] from = { "brand", "logo" };
 
 		// Ids of views in listview layout
 		int[] to = { R.id.brand, R.id.logo };
+		
+		// For each row in the list which stores logo and brand
+		List<HashMap<String, String>> adapterList = new ArrayList<HashMap<String, String>>();
+		
+		int lastMax = 1000;		
+		for (int i = 0; i < Global.MAX_RESULT_DISPLAYED; i++) {
+			HashMap<String, String> hm = new HashMap<String, String>();
+			int oneEntry = getMax(resultComparator, lastMax);
+			hm.put("brand", Global.brands[Global.getPositionLogo(oneEntry)]);
+			hm.put("logo", String.valueOf(oneEntry));
+			displayedDrawables[i] = oneEntry;
+			lastMax = resultComparator.get(oneEntry);
+		
+			adapterList.add(hm);
+		}
 
 		// Instantiating an adapter to store each items
 		// R.layout.listview defines the layout of each item
-		// We put one image and one string in each item
+		// We put one string and one image in each item
 		SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), adapterList, R.layout.listview, from, to);
 
 		// Getting a reference to listview (composant) to apply the adapter
-		ListView lv = null;
-		lv = ((ListView) findViewById(R.id.listview_widget));
+		ListView lv = ((ListView) findViewById(R.id.listview_widget));
 		lv.setAdapter(adapter);
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
 				Intent _showAnalyse = new Intent(AnalyseActivity.this, ShowAnalyse.class);
-				_showAnalyse.putExtra("position", position);
-				startActivityForResult(_showAnalyse, RETURN_SHOW_ANALYSIS);
+				_showAnalyse.putExtra("drawableSelected", displayedDrawables[position]);
+				startActivityForResult(_showAnalyse, 0);
 			}
 		});
 

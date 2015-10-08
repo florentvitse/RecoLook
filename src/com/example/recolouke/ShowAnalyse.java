@@ -1,13 +1,13 @@
 package com.example.recolouke;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 public class ShowAnalyse extends Activity {
 
@@ -30,18 +30,13 @@ public class ShowAnalyse extends Activity {
 		// Get the position of the image clicked in the previous list
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			int position = extras.getInt("position");
-			// Display a toast
-			Toast.makeText(ShowAnalyse.this, "Item selected position : " + String.valueOf(position), Toast.LENGTH_SHORT)
-					.show();
 
 			try {
-				((ImageView) findViewById(R.id.imgReferenceSelected))
-						.setImageBitmap(ImageUtility.getDrawableBitmap(this, position));
+				Uri uri = ImageUtility.getDrawableUri(this, extras.getInt("drawableSelected"));
+				((ImageView) findViewById(R.id.imgReferenceSelected)).setImageURI(uri);
 			} catch (Exception e) {
 				// Error
 			}
-
 		}
 	}
 
