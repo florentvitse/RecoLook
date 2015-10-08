@@ -34,4 +34,17 @@ public class Global extends Application {
         R.drawable.hp,
         R.drawable.kfc
     };
+    
+    static int MAX_RESULT_DISPLAYED = 3;
+    
+	static int getPositionLogo(int id)
+	{
+		int valR = 0;
+		for(int temp : logoIDs)
+		{	
+			if(temp == id) return valR;
+			valR++;
+		}
+		return -1;
+	}
 }

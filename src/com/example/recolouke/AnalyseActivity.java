@@ -2,8 +2,11 @@ package com.example.recolouke;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
@@ -13,12 +16,11 @@ import org.opencv.features2d.DMatch;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+@SuppressLint("UseSparseArrays")
 public class AnalyseActivity extends Activity {
 
 	final static String TAG = "AnalyseActivity";
@@ -59,15 +62,22 @@ public class AnalyseActivity extends Activity {
 
 		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);
 
-		/** Display a list of logo **/
-
+		/** Construct the list of logo **/
+		HashMap<Integer, Integer> resultComparator = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED),
+				FeatureDetector.ORB,
+				DescriptorExtractor.ORB);
+		
 		// For each row in the list which stores logo and brand
 		List<HashMap<String, String>> adapterList = new ArrayList<HashMap<String, String>>();
-
-		for (int i = 0; i < Global.brands.length; i++) {
+		int lastMax = 1000;
+		
+		for (int i = 0; i < Global.MAX_RESULT_DISPLAYED; i++) {
 			HashMap<String, String> hm = new HashMap<String, String>();
-			hm.put("brand", Global.brands[i]);
-			hm.put("logo", String.valueOf(Global.logoIDs[i]));
+			int oneEntry = getMax(resultComparator, lastMax);
+			hm.put("logo", String.valueOf(oneEntry));
+			lastMax = resultComparator.get(oneEntry);
+			
+			hm.put("brand", Global.brands[Global.getPositionLogo(oneEntry)]);
 			adapterList.add(hm);
 		}
 
@@ -96,8 +106,6 @@ public class AnalyseActivity extends Activity {
 			}
 		});
 
-		analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED), FeatureDetector.ORB,
-				DescriptorExtractor.ORB);
 	}
 
 	@Override
@@ -119,38 +127,13 @@ public class AnalyseActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
-		// Creation of the detector
-		// FeatureDetector.ORB to give to the method here (generic method also)
+	private HashMap<Integer, Mat> calculateDescriptors(int detector, int descriptorExtractor) {
 		FeatureDetector _detector = FeatureDetector.create(detector);
-		// Creation of the descriptor
-		// DescriptorExtractor.ORB to give to the method here (generic method
-		// also)
 		DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
-		// Creation of the matcher
-		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
-		// Vector of matches
-		MatOfDMatch matches = new MatOfDMatch();
 
-		// Object that will store the keypoint of the scene
-		MatOfKeyPoint _scenekeypoints = new MatOfKeyPoint();
-		// Detection of the keyPoints of the scene
-		_detector.detect(srcGrayscale, _scenekeypoints);
-
-		Log.w(TAG, "* Number of keypoints (scene) *");
-		Log.w(TAG, String.valueOf(_scenekeypoints.size()));
-
-		Mat _descriptors_scene = new Mat();
-		// Extraction of the descriptors
-		_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
-
-		Log.w(TAG, "* Number of descriptor (scene) *");
-		Log.w(TAG, String.valueOf(_descriptors_scene.size()));
-
-		SparseIntArray resultComparator = new SparseIntArray();
+		HashMap<Integer, Mat> logoDescriptors = new HashMap<Integer, Mat>();
 		
 		for (int logo : Global.logoIDs) {
-
 			// Object for the object image
 			MatOfKeyPoint _objectkeypoints = new MatOfKeyPoint();
 
@@ -163,55 +146,82 @@ public class AnalyseActivity extends Activity {
 			}
 			_detector.detect(objToCompare, _objectkeypoints);
 
-			//Log.w(TAG, "* Number of keypoints (object) *");
-			//Log.w(TAG, String.valueOf(_objectkeypoints.size()));
+			// Log.w(TAG, "* Number of keypoints (object) *");
+			// Log.w(TAG, String.valueOf(_objectkeypoints.size()));
 
 			Mat _descriptors_object = new Mat();
 			_descriptor.compute(objToCompare, _objectkeypoints, _descriptors_object);
 
-			/*
-			 * DESCRIPTOR FILE TEST
-			 * 
-			 * MatFileStorage xmlDescriptor = new MatFileStorage();
-			 * xmlDescriptor.create("FILEPATH MAC"); try {
-			 * xmlDescriptor.writeMat("DescriptorXML", _descriptors_object);
-			 * xmlDescriptor.release(); } catch (Exception e) { Log.e(TAG,
-			 * e.getMessage()); }
-			 * 
-			 * /* END - DESCRIPTOR FILE TEST
-			 */
+			logoDescriptors.put(logo, _descriptors_object);
+		}
+		return logoDescriptors;
+	}
 
-			//Log.w(TAG, "* Number of descriptor (object) *");
-			//Log.w(TAG, String.valueOf(_descriptors_object.size()));
+	private int descriptorsMatcher(Mat descriptorObject, Mat descriptorScene) {
+		// Creation of the matcher
+		DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+		// Vector of matches
+		MatOfDMatch matches = new MatOfDMatch();
 
-			// Comparison
-			matcher.match(_descriptors_object, _descriptors_scene, matches);
+		// Comparison
+		matcher.match(descriptorObject, descriptorScene, matches);
 
-			//Log.w(TAG, "* Number of matches *");
-			//Log.w(TAG, String.valueOf(matches.size()));
+		// Log.w(TAG, "* Number of matches *");
+		// Log.w(TAG, String.valueOf(matches.size()));
 
-			List<DMatch> matchesList = matches.toList();
+		List<DMatch> matchesList = matches.toList();
 
-			// Les "bons" appariements (i.e. leur distance est < 60 )
-			LinkedList<DMatch> goodMatchesArray = new LinkedList<DMatch>();
+		// Les "bons" appariements (i.e. leur distance est < 60 )
+		LinkedList<DMatch> goodMatchesArray = new LinkedList<DMatch>();
 
-			for (DMatch el : matchesList) {
-				
-				if(el.distance < 60f)
-				{
-					goodMatchesArray.add(el);
-				}
+		for (DMatch el : matchesList) {
+
+			if (el.distance < 60f) {
+				goodMatchesArray.add(el);
 			}
+		}
+		return goodMatchesArray.size();
+	}
 
-			Log.w(TAG, "* Number of good matches *");
-			Log.w(TAG, String.valueOf(goodMatchesArray.size()));
-			
-			resultComparator.append(logo, goodMatchesArray.size());
+	public HashMap<Integer, Integer> analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
+		// Creation of the detector
+		// FeatureDetector.ORB to give to the method here (generic method also)
+		FeatureDetector _detector = FeatureDetector.create(detector);
+		// Creation of the descriptor
+		// DescriptorExtractor.ORB to give to the method here (generic method
+		// also)
+		DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
+
+		// Object that will store the keypoint of the scene
+		MatOfKeyPoint _scenekeypoints = new MatOfKeyPoint();
+		// Detection of the keyPoints of the scene
+		_detector.detect(srcGrayscale, _scenekeypoints);
+
+		//Log.w(TAG, "* Number of keypoints (scene) *");
+		//Log.w(TAG, String.valueOf(_scenekeypoints.size()));
+
+		Mat _descriptors_scene = new Mat();
+		// Extraction of the descriptors
+		_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
+
+		//Log.w(TAG, "* Number of descriptor (scene) *");
+		//Log.w(TAG, String.valueOf(_descriptors_scene.size()));
+
+		HashMap<Integer, Integer> resultComparator = new HashMap<Integer, Integer>();
+
+		HashMap<Integer, Mat> logoDescriptors = new HashMap<Integer, Mat>();
+		
+		logoDescriptors.putAll(calculateDescriptors(detector, descriptorExtractor));
+		Iterator<Map.Entry<Integer, Mat>> it = logoDescriptors.entrySet().iterator();
+
+		while (it.hasNext()) 
+		{
+		  Entry<Integer, Mat> entry = it.next();
+		  resultComparator.put(entry.getKey(), descriptorsMatcher(entry.getValue(), _descriptors_scene));
 		}
 		
-		Log.w(TAG, resultComparator.size() + " images comparées");
-		Log.w(TAG, resultComparator.toString());
-
+		return resultComparator;
+	
 		/*
 		 * Mat featuredImg = new Mat(); Scalar kpColor = new
 		 * Scalar(255,159,10);//this will be color of keypoints //featuredImg
@@ -230,5 +240,24 @@ public class AnalyseActivity extends Activity {
 		 * findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);
 		 */
 
+	}
+	
+	private int getMax(HashMap<Integer, Integer> resultAnalyse, int lastMax)
+	{
+		int keyMax = 0;
+		int tempMax = 0;
+		
+		Iterator<Entry<Integer, Integer>> it = resultAnalyse.entrySet().iterator();
+
+		while (it.hasNext()) 
+		{
+		  Entry<Integer, Integer> entry = it.next();
+		  if(entry.getValue() > tempMax && entry.getValue() < lastMax)
+		  {
+			  tempMax = entry.getValue();
+			  keyMax = entry.getKey();
+		  }
+		}
+		return keyMax;
 	}
 }
