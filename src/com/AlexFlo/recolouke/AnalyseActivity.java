@@ -1,4 +1,4 @@
-package com.example.recolouke;
+package com.AlexFlo.recolouke;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +16,9 @@ import org.opencv.features2d.DMatch;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
+
+import com.example.recolouke.R;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;

@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name="com.AlexFlo.recolouke.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,11 +24,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AnalyseActivity"
+            android:name="com.AlexFlo.recolouke.AnalyseActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".ShowAnalyse"
+            android:name="com.AlexFlo.recolouke.ShowAnalyse"
             android:label="@string/app_name" >
         </activity>
     </application>

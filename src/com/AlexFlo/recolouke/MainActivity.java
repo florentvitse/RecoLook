@@ -1,6 +1,8 @@
-package com.example.recolouke;
+package com.AlexFlo.recolouke;
 
 import java.io.IOException;
+
+import com.example.recolouke.R;
 
 import android.app.Activity;
 import android.content.Intent;

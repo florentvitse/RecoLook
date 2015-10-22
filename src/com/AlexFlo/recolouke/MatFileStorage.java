@@ -1,4 +1,4 @@
-package com.example.recolouke;
+package com.AlexFlo.recolouke;
 
 import java.io.File;
 import java.util.Scanner;

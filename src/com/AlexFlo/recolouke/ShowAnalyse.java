@@ -1,4 +1,6 @@
-package com.example.recolouke;
+package com.AlexFlo.recolouke;
+
+import com.example.recolouke.R;
 
 import android.app.Activity;
 import android.net.Uri;
