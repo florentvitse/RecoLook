@@ -1,5 +1,12 @@
 package com.AlexFlo.recolouke;
 
+import java.util.HashMap;
+
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfKeyPoint;
+import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.FeatureDetector;
+
 import com.example.recolouke.R;
 
 import android.app.Activity;
@@ -29,17 +36,8 @@ public class ShowAnalyse extends Activity {
 
 		((ImageView) findViewById(R.id.imgAnalyzed)).setImageBitmap(Global.IMG_SELECTED);
 
-		// Get the position of the image clicked in the previous list
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-
-			try {
-				Uri uri = ImageUtility.getDrawableUri(this, extras.getInt("drawableSelected"));
-				((ImageView) findViewById(R.id.imgReferenceSelected)).setImageURI(uri);
-			} catch (Exception e) {
-				// Error
-			}
-		}
+		//TODO 
+		// Working comparison
 	}
 
 	@Override
@@ -60,4 +58,34 @@ public class ShowAnalyse extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	// Created Method
+	
+	/*
+	 * analyseScene
+	 * Calculate descriptor of one image converted into grayscale
+	 */
+	
+	public void analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
+		// Creation of the detector
+		// FeatureDetector.ORB to give to the method here (generic method also)
+		FeatureDetector _detector = FeatureDetector.create(detector);
+		// Creation of the descriptor
+		// DescriptorExtractor.ORB to give to the method here (generic method
+		// also)
+		DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
+
+		// Object that will store the keypoint of the scene
+		MatOfKeyPoint _scenekeypoints = new MatOfKeyPoint();
+		// Detection of the keyPoints of the scene
+		_detector.detect(srcGrayscale, _scenekeypoints);
+
+		//Log.w(TAG, "* Number of keypoints (scene) *");
+		//Log.w(TAG, String.valueOf(_scenekeypoints.size()));
+
+		Mat _descriptors_scene = new Mat();
+		// Extraction of the descriptors
+		_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
+	}
+	
 }

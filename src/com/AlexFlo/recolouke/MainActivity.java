@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void startComparisonActivity() {
-		startActivityForResult(new Intent(MainActivity.this, AnalyseActivity.class), RETURN_ANALYSIS);
+		startActivityForResult(new Intent(MainActivity.this, ShowAnalyse.class), RETURN_ANALYSIS);
 	}
 
 	@Override
