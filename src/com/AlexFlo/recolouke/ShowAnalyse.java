@@ -63,7 +63,7 @@ public class ShowAnalyse extends Activity {
 	
 	/*
 	 * analyseScene
-	 * Calculate descriptor of one image converted into grayscale
+	 * 
 	 */
 	
 	public void analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
