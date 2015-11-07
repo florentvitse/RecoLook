@@ -66,7 +66,7 @@ public class ShowAnalyse extends Activity {
 	 * 
 	 */
 	
-	public void analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
+	private void analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
 		// Creation of the detector
 		// FeatureDetector.ORB to give to the method here (generic method also)
 		FeatureDetector _detector = FeatureDetector.create(detector);
@@ -86,6 +86,52 @@ public class ShowAnalyse extends Activity {
 		Mat _descriptors_scene = new Mat();
 		// Extraction of the descriptors
 		_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
+	}
+	
+	/*
+	 * testClassifiers
+	 * 
+	 */
+	
+	private String testClassifiers()
+	{
+		/*
+		Part of the code to compute BoW with ORB:
+		
+		for( all your images )
+		{
+		    // Detect interesting points
+		    orb(img, Mat(), keypoints, descriptors);
+		    // Keep characteristics of images for further clustering.
+		    characteristics.push_back(descriptors);
+		}
+		// Create the BOW object with K classes
+		BOWKMeansTrainer bow(K);
+		for( all your descriptors )
+		{
+		    // Convert characteristics vector to float
+		    // This is require by BOWTrainer class
+		    Mat descr;
+		    characteristics[k].convertTo(descr, CV_32F);
+		    // Add it to the BOW object
+		    bow.add(descr);
+		}
+		// Perform the clustering of stored vectors
+		Mat voc = bow.cluster();
+		You need to convert features from CV_8U to CV_32F, because bag of words object expects float descriptors.
+		It is not required for SIFT or SURF descriptors because they are in float
+		*/
+		
+		//TODO Chargement du vocabulaire
+		
+		//TODO Chargement des classifiers
+		
+		//TODO POUR CHAQUE CLASSIFIER - CALCUL & ANALYSE DE l'HISTO
+		
+		//TODO Détermination du 'best match'
+		
+		//TODO return value = La 'classe' la plus proche
+		return null;
 	}
 	
 }
