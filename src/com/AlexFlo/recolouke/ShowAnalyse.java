@@ -12,6 +12,7 @@ import com.example.recolouke.R;
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +21,17 @@ import android.widget.ImageView;
 
 public class ShowAnalyse extends Activity {
 
+	final static String TAG = "[ShowAnalyse]";
+	
+	final static String homeURL = "http://www-rech.telecom-lille.fr/freeorb/";
+	final static String indexFile = "index.json";
+	final static String vocabulary = "vocabulary.yml";
+	final static String classifiersDirectory = "classifiers/";
+	final static String testImagesDirectory = "test-images/";
+	final static String trainImagesDirectory = "test-images/";
+	final static String testImages = "test_images.txt";
+	final static String trainImages = "test_images.txt";
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -38,6 +50,7 @@ public class ShowAnalyse extends Activity {
 
 		//TODO 
 		// Working comparison
+		testClassifiers();
 	}
 
 	@Override
@@ -58,6 +71,7 @@ public class ShowAnalyse extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
 	
 	// Created Method
 	
@@ -121,6 +135,16 @@ public class ShowAnalyse extends Activity {
 		You need to convert features from CV_8U to CV_32F, because bag of words object expects float descriptors.
 		It is not required for SIFT or SURF descriptors because they are in float
 		*/
+		
+		//TODO Chargement de l'index
+		String fullURL = homeURL + indexFile;
+		try {
+			String idx = URLReader.readURLData(fullURL);
+			Log.i(TAG, idx);
+		} catch (Exception e) {
+			Log.e(TAG,"Erreur lors de la tentative de lecture du fichier à l'adresse : " + fullURL);
+		}
+		
 		
 		//TODO Chargement du vocabulaire
 		

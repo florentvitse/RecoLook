@@ -17,6 +17,8 @@ import android.widget.ImageView;
 
 public class MainActivity extends Activity {
 
+	final static String TAG = "[MainActivity]";
+	
 	final int RESULT_CAMERA = 200;
 	final int RESULT_ACCESS_GALLERY = 300;
 	final int RETURN_ANALYSIS = 400;
