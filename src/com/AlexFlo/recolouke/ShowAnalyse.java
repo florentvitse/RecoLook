@@ -1,6 +1,8 @@
 package com.AlexFlo.recolouke;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
@@ -25,7 +27,7 @@ public class ShowAnalyse extends Activity {
 	
 	final static String homeURL = "http://www-rech.telecom-lille.fr/freeorb/";
 	final static String indexFile = "index.json";
-	final static String vocabulary = "vocabulary.yml";
+	static String vocabulary = "vocabulary.yml";
 	final static String classifiersDirectory = "classifiers/";
 	final static String testImagesDirectory = "test-images/";
 	final static String trainImagesDirectory = "test-images/";
@@ -80,7 +82,7 @@ public class ShowAnalyse extends Activity {
 	 * 
 	 */
 	
-	private void analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
+	private Mat analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
 		// Creation of the detector
 		// FeatureDetector.ORB to give to the method here (generic method also)
 		FeatureDetector _detector = FeatureDetector.create(detector);
@@ -94,12 +96,11 @@ public class ShowAnalyse extends Activity {
 		// Detection of the keyPoints of the scene
 		_detector.detect(srcGrayscale, _scenekeypoints);
 
-		//Log.w(TAG, "* Number of keypoints (scene) *");
-		//Log.w(TAG, String.valueOf(_scenekeypoints.size()));
 
 		Mat _descriptors_scene = new Mat();
 		// Extraction of the descriptors
 		_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
+		return _descriptors_scene;
 	}
 	
 	/*
@@ -136,25 +137,28 @@ public class ShowAnalyse extends Activity {
 		It is not required for SIFT or SURF descriptors because they are in float
 		*/
 		
-		//TODO Chargement de l'index
-		String fullURL = homeURL + indexFile;
-		try {
-			String idx = URLReader.readURLData(fullURL);
-			Log.i(TAG, idx);
-		} catch (Exception e) {
-			Log.e(TAG,"Erreur lors de la tentative de lecture du fichier à l'adresse : " + fullURL);
-		}
+		//Extraction of descriptors of the image
+		Mat scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED)
+				, FeatureDetector.ORB
+				, DescriptorExtractor.ORB);
 		
 		
 		//TODO Chargement du vocabulaire
+		vocabulary = Global.getVocabularyFileName(homeURL + indexFile);
+		if(vocabulary != null)
+		{
+			Mat vocab = Global.getVocabulary(homeURL + vocabulary);
 		
-		//TODO Chargement des classifiers
+			//TODO Chargement des classifiers
+			List<Classifier> classifiers = new LinkedList<Classifier>();
+			classifiers.addAll(Global.getClassifiers(homeURL + indexFile));
 		
 		//TODO POUR CHAQUE CLASSIFIER - CALCUL & ANALYSE DE l'HISTO
 		
 		//TODO Détermination du 'best match'
 		
 		//TODO return value = La 'classe' la plus proche
+		}
 		return null;
 	}
 	

@@ -66,7 +66,7 @@ public class AnalyseActivity extends Activity {
 		((ImageView) findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);
 
 		/** Construct the list of logo **/
-		displayedDrawables = new Integer[Global.MAX_RESULT_DISPLAYED];
+		/*displayedDrawables = new Integer[Global.MAX_RESULT_DISPLAYED];
 		HashMap<Integer, Integer> resultComparator = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED),
 				FeatureDetector.ORB,
 				DescriptorExtractor.ORB);
@@ -109,7 +109,7 @@ public class AnalyseActivity extends Activity {
 				startActivityForResult(_showAnalyse, 0);
 			}
 		});
-
+		*/
 	}
 
 	@Override
@@ -130,6 +130,8 @@ public class AnalyseActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	/*
 
 	private HashMap<Integer, Mat> calculateDescriptors(int detector, int descriptorExtractor) {
 		FeatureDetector _detector = FeatureDetector.create(detector);
@@ -225,24 +227,6 @@ public class AnalyseActivity extends Activity {
 		}
 		
 		return resultComparator;
-	
-		/*
-		 * Mat featuredImg = new Mat(); Scalar kpColor = new
-		 * Scalar(255,159,10);//this will be color of keypoints //featuredImg
-		 * will be the output of first image
-		 * Features2d.drawKeypoints(objToCompare, _objectkeypoints, featuredImg
-		 * , kpColor, 0);
-		 * 
-		 * Bitmap a = null; try { a =
-		 * MediaStore.Images.Media.getBitmap(getContentResolver(), drawableUri);
-		 * } catch (FileNotFoundException e) { // TODO Auto-generated catch
-		 * block e.printStackTrace(); } catch (IOException e) { // TODO
-		 * Auto-generated catch block e.printStackTrace(); } Bitmap imageMatched
-		 * = Bitmap.createBitmap(a.getWidth() , a.getHeight(),
-		 * Bitmap.Config.RGB_565); Utils.matToBitmap(featuredImg,
-		 * Global.IMG_SELECTED); ((ImageView)
-		 * findViewById(R.id.imgToAnalyse)).setImageBitmap(Global.IMG_SELECTED);
-		 */
 
 	}
 	
@@ -263,5 +247,5 @@ public class AnalyseActivity extends Activity {
 		  }
 		}
 		return keyMax;
-	}
+	}*/
 }
