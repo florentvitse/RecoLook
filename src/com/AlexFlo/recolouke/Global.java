@@ -15,7 +15,7 @@ public class Global extends Application {
 	final static String TAG = "[Global]";
 	static Bitmap IMG_SELECTED = null;
 	static String vocabFile = null;
-	static List<Classifier> classifiers = null;
+	static List<Classe> classes = null;
 	static Mat vocabulary = null;
 
 	public static Mat parseVocabulary(String jsonFile) {
@@ -43,14 +43,14 @@ public class Global extends Application {
 		vocabulary = null;
 	}
 
-	public static List<Classifier> parseClassifiers(String jsonFile) {
-		if (classifiers == null) {
-			loadClassifiers(jsonFile);
+	public static List<Classe> parseClasses(String jsonFile) {
+		if (classes == null) {
+			loadClasses(jsonFile);
 		}
-		return classifiers;
+		return classes;
 	}
 
-	private static void loadClassifiers(String jsonFile) {
+	private static void loadClasses(String jsonFile) {
 		final String TAG_BRANDS = "brands";
 		final String TAG_VOCAB = "vocabulary";
 		final String TAG_FIELD_BRAND = "brandname";
@@ -65,7 +65,7 @@ public class Global extends Application {
 				// Get an array of brands
 				JSONArray brands = jsonObject.getJSONArray(TAG_BRANDS);
 
-				classifiers = new LinkedList<Classifier>();
+				classes = new LinkedList<Classe>();
 				// For each brand, get settings
 				for (int i = 0; i < brands.length(); i++) {
 					JSONObject obj = brands.getJSONObject(i);
@@ -80,18 +80,18 @@ public class Global extends Application {
 						}
 					}
 					// Add of an object classifier
-					classifiers.add(new Classifier(file, brand, url, imgs.toString()));
+					classes.add(new Classe(file, brand, url, imgs.toString()));
 				}
 				// Get the filename of vocabulary file
 				vocabFile = jsonObject.getString(TAG_VOCAB);
 			} catch (JSONException e) {
-				classifiers = null;
+				classes = null;
 				Log.e(TAG, "Le parsing du fichier JSON a échoué");
 			}
 		}
 	}
 
 	public static void unloadClassifiers() {
-		classifiers = null;
+		classes = null;
 	}
 }

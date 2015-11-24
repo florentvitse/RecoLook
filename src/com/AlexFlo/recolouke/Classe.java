@@ -1,12 +1,12 @@
 package com.AlexFlo.recolouke;
 
-public class Classifier {
+public class Classe {
 	private String classifierFile;
 	private String brand;
 	private String brandURL;
 	private String[] images;
 	
-	public Classifier(String file, String b, String url, String imgs)
+	public Classe(String file, String b, String url, String imgs)
 	{
 		classifierFile = file;
 		brand = b;

@@ -138,8 +138,8 @@ public class ShowAnalyse extends Activity {
 			Mat vocab = Global.getVocabulary(homeURL + vocabulary);*/
 		
 			//TODO Chargement des classifiers
-			List<Classifier> classifiers = new LinkedList<Classifier>();
-			classifiers.addAll(Global.parseClassifiers(homeURL + indexFile));
+			List<Classe> classifiers = new LinkedList<Classe>();
+			classifiers.addAll(Global.parseClasses(homeURL + indexFile));
 		
 		//TODO POUR CHAQUE CLASSIFIER - CALCUL & ANALYSE DE l'HISTO
 		
@@ -167,7 +167,7 @@ public class ShowAnalyse extends Activity {
 		}
 		
 	    protected void onPostExecute() {  
-	    	Global.parseClassifiers(result);
+	    	Global.parseClasses(result);
 	    }
 	}
 	
@@ -209,7 +209,7 @@ public class ShowAnalyse extends Activity {
 		}
 		
 	    protected void onPostExecute() {  
-	    	//Global.parseOneClassifiers(result);
+	    	//Global.parseClassifiers(result);
 	    }
 	}
 }
