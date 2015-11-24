@@ -6,12 +6,12 @@ public class Classifier {
 	private String brandURL;
 	private String[] images;
 	
-	public Classifier(String file, String b, String url, String[] imgs)
+	public Classifier(String file, String b, String url, String imgs)
 	{
 		classifierFile = file;
 		brand = b;
 		brandURL = url;
-		images = imgs;
+		images = imgs.split(";");
 	}
 	
 	public String getClassifierFile() {

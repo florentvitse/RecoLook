@@ -1,6 +1,5 @@
 package com.AlexFlo.recolouke;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,7 +11,7 @@ import org.opencv.features2d.FeatureDetector;
 import com.example.recolouke.R;
 
 import android.app.Activity;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -52,7 +51,7 @@ public class ShowAnalyse extends Activity {
 
 		//TODO 
 		// Working comparison
-		testClassifiers();
+		new DownloadHTTPFileIndex().execute(homeURL + indexFile);
 	}
 
 	@Override
@@ -76,12 +75,6 @@ public class ShowAnalyse extends Activity {
 	
 	
 	// Created Method
-	
-	/*
-	 * analyseScene
-	 * 
-	 */
-	
 	private Mat analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
 		// Creation of the detector
 		// FeatureDetector.ORB to give to the method here (generic method also)
@@ -102,12 +95,7 @@ public class ShowAnalyse extends Activity {
 		_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
 		return _descriptors_scene;
 	}
-	
-	/*
-	 * testClassifiers
-	 * 
-	 */
-	
+
 	private String testClassifiers()
 	{
 		/*
@@ -138,28 +126,90 @@ public class ShowAnalyse extends Activity {
 		*/
 		
 		//Extraction of descriptors of the image
-		Mat scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED)
+		/*Mat scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED)
 				, FeatureDetector.ORB
-				, DescriptorExtractor.ORB);
+				, DescriptorExtractor.ORB);*/
 		
 		
 		//TODO Chargement du vocabulaire
-		vocabulary = Global.getVocabularyFileName(homeURL + indexFile);
+		/*vocabulary = Global.getVocabularyFileName(homeURL + indexFile);
 		if(vocabulary != null)
 		{
-			Mat vocab = Global.getVocabulary(homeURL + vocabulary);
+			Mat vocab = Global.getVocabulary(homeURL + vocabulary);*/
 		
 			//TODO Chargement des classifiers
 			List<Classifier> classifiers = new LinkedList<Classifier>();
-			classifiers.addAll(Global.getClassifiers(homeURL + indexFile));
+			classifiers.addAll(Global.parseClassifiers(homeURL + indexFile));
 		
 		//TODO POUR CHAQUE CLASSIFIER - CALCUL & ANALYSE DE l'HISTO
 		
 		//TODO Détermination du 'best match'
 		
 		//TODO return value = La 'classe' la plus proche
-		}
+		//}
 		return null;
 	}
 	
+	// Implementation of AsyncTask used to download files asynchronous
+	class DownloadHTTPFileIndex extends AsyncTask<String, Integer, Integer> 
+	{
+		String result = null;
+
+		@Override
+		protected Integer doInBackground(String... params) {
+	        try {
+	        	result = URLReader.readURLData(params[0]);
+	        	return 0;
+	        } catch (Exception e) {
+	            Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
+	            return -1;
+	        }
+		}
+		
+	    protected void onPostExecute() {  
+	    	Global.parseClassifiers(result);
+	    }
+	}
+	
+	// Second Implementation of AsyncTask used to download files asynchronous
+	class DownloadHTTPFileVocab extends AsyncTask<String, Integer, Integer> 
+	{
+		String result = null;
+
+		@Override
+		protected Integer doInBackground(String... params) {
+	        try {
+	        	result = URLReader.readURLData(params[0]);
+	        	return 0;
+	        } catch (Exception e) {
+	            Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
+	            return -1;
+	        }
+		}
+		
+	    protected void onPostExecute() {  
+	    	Global.parseVocabulary(result);
+	    }
+	}
+	
+	// Third Implementation of AsyncTask used to download files asynchronous
+	class DownloadHTTPFileClassifier extends AsyncTask<String, Integer, Integer> 
+	{
+		String result = null;
+
+		@Override
+		protected Integer doInBackground(String... params) {
+	        try {
+	        	result = URLReader.readURLData(params[0]);
+	        	return 0;
+	        } catch (Exception e) {
+	            Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
+	            return -1;
+	        }
+		}
+		
+	    protected void onPostExecute() {  
+	    	//Global.parseOneClassifiers(result);
+	    }
+	}
 }

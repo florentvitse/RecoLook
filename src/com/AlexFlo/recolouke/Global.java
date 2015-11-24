@@ -14,101 +14,84 @@ public class Global extends Application {
 
 	final static String TAG = "[Global]";
 	static Bitmap IMG_SELECTED = null;
+	static String vocabFile = null;
 	static List<Classifier> classifiers = null;
+	static Mat vocabulary = null;
 
-	public static String getVocabularyFileName(String fullUrl)
-	{
-		final String TAG_VOCAB = "vocabulary";
-		
-		try {
-			String idx = URLReader.readURLData(fullUrl);
-			if (idx != null) {
-				try {
-					JSONObject jsonObject = new JSONObject(idx);
-					return jsonObject.getString(TAG_VOCAB);
-					
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
-
-		} catch (Exception e) {
-			Log.e(TAG, "Erreur lors de la tentative de lecture du fichier à l'adresse : " + fullUrl);
+	public static Mat parseVocabulary(String jsonFile) {
+		if (vocabulary == null) {
+			loadVocabulary(jsonFile);
 		}
-		return null;	
+		return vocabulary;
 	}
-	
-	public static Mat getVocabulary(String fullUrl)
-	{		
-		try {
-			String idx = URLReader.readURLData(fullUrl);
-			if (idx != null) {
-				//TODO LOAD THE MAT VOCABULARY
-			}
 
-		} catch (Exception e) {
-			Log.e(TAG, "Erreur lors de la tentative de lecture du fichier à l'adresse : " + fullUrl);
-		}	
-		return null;
-	}
-		
-	public static List<Classifier> getClassifiers(String fullUrl)
-	{
-		if(classifiers == null)
-		{
-			return loadClassifiers(fullUrl);
-		} else {
-			return classifiers;
+	public static void loadVocabulary(String jsonFile) {
+		if (jsonFile != null) {
+			try {
+				JSONObject jsonObject = new JSONObject(jsonFile);
+				
+				// TODO LOAD THE MAT VOCABULARY
+				
+			} catch (JSONException e) {
+				vocabulary = null;
+				Log.e(TAG, "Le parsing du fichier JSON a échoué");
+			}
 		}
 	}
 	
-	private static List<Classifier> loadClassifiers(String fullUrl) {
+	public static void unloadVocabulary() {
+		vocabulary = null;
+	}
+
+	public static List<Classifier> parseClassifiers(String jsonFile) {
+		if (classifiers == null) {
+			loadClassifiers(jsonFile);
+		}
+		return classifiers;
+	}
+
+	private static void loadClassifiers(String jsonFile) {
 		final String TAG_BRANDS = "brands";
+		final String TAG_VOCAB = "vocabulary";
 		final String TAG_FIELD_BRAND = "brandname";
 		final String TAG_FIELD_BRANDURL = "url";
 		final String TAG_FIELD_FILE = "classifier";
 		final String TAG_FIELD_IMAGES = "images";
 
-		List<Classifier> classifiers = null;
+		// Parsing of file
+		if (jsonFile != null) {
+			try {
+				JSONObject jsonObject = new JSONObject(jsonFile);
+				// Get an array of brands
+				JSONArray brands = jsonObject.getJSONArray(TAG_BRANDS);
 
-		// Chargement de l'index
-		String idx;
-		try {
-			idx = URLReader.readURLData(fullUrl);
-			if (idx != null) {
-				try {
-					JSONObject jsonObject = new JSONObject(idx);
-					JSONArray brands = jsonObject.getJSONArray(TAG_BRANDS);
-
-					classifiers = new LinkedList<Classifier>();
-					for (int i = 0; i < brands.length(); i++) {
-						JSONObject obj = brands.getJSONObject(i);
-						String brand = obj.getString(TAG_FIELD_BRAND);
-						String url = obj.getString(TAG_FIELD_BRANDURL);
-						String file = obj.getString(TAG_FIELD_FILE);
-						JSONArray images = obj.getJSONArray(TAG_FIELD_IMAGES);
-						List<String> imgs = null;
-						if (images != null) {
-							imgs = new LinkedList<String>();
-							for (int j = 0; j < images.length(); j++) {
-								imgs.add(images.getString(j));
-							}
+				classifiers = new LinkedList<Classifier>();
+				// For each brand, get settings
+				for (int i = 0; i < brands.length(); i++) {
+					JSONObject obj = brands.getJSONObject(i);
+					String brand = obj.getString(TAG_FIELD_BRAND);
+					String url = obj.getString(TAG_FIELD_BRANDURL);
+					String file = obj.getString(TAG_FIELD_FILE);
+					JSONArray images = obj.getJSONArray(TAG_FIELD_IMAGES);
+					StringBuilder imgs = new StringBuilder();
+					if (images != null) {
+						for (int j = 0; j < images.length(); j++) {
+							imgs.append(images.getString(j) + ';');
 						}
-						//Ajout du classifier parsé
-						classifiers.add(new Classifier(file, brand, url, (String[]) imgs.toArray()));						
 					}
-				} catch (JSONException e) {
-					e.printStackTrace();
+					// Add of an object classifier
+					classifiers.add(new Classifier(file, brand, url, imgs.toString()));
 				}
+				// Get the filename of vocabulary file
+				vocabFile = jsonObject.getString(TAG_VOCAB);
+			} catch (JSONException e) {
+				classifiers = null;
+				Log.e(TAG, "Le parsing du fichier JSON a échoué");
 			}
-		} catch (Exception e) {
-			Log.e(TAG, "Erreur lors de la tentative de lecture du fichier à l'adresse : " + fullUrl);
 		}
-		return classifiers;
 	}
-	
-	public static void unloadClassifiers()
-	{
+
+	public static void unloadClassifiers() {
 		classifiers = null;
 	}
 }
