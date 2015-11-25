@@ -4,10 +4,13 @@ import android.app.Application;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.json.*;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 public class Global extends Application {
@@ -17,6 +20,13 @@ public class Global extends Application {
 	static String vocabFile = null;
 	static List<Classe> classes = null;
 	static Mat vocabulary = null;
+	
+	static {
+		if (!OpenCVLoader.initDebug()) {
+			// ERROR - Initialization Error
+			Log.e(TAG, "OpenCV - Initialization Error");
+		}
+	}
 
 	public static Mat parseVocabulary(String jsonFile) {
 		if (vocabulary == null) {
@@ -25,14 +35,17 @@ public class Global extends Application {
 		return vocabulary;
 	}
 
-	public static void loadVocabulary(String jsonFile) {
-		if (jsonFile != null) {
+	public static void loadVocabulary(String ymlFile) {
+		if (ymlFile != null) {
 			try {
-				JSONObject jsonObject = new JSONObject(jsonFile);
-				
+				int startArray = ymlFile.indexOf("data:") + 7;				
 				// TODO LOAD THE MAT VOCABULARY
-				
-			} catch (JSONException e) {
+				String tab = ymlFile.substring(startArray, (ymlFile.length()));
+				List<Float> floatVocab = new LinkedList<Float>();
+				floatVocab.addAll( tabStringtoFloat(tab) );
+				//vocabulary = new Mat(50, 32, CvType.CV_32F);
+				vocabulary = org.opencv.utils.Converters.vector_float_to_Mat(floatVocab);
+			} catch (Exception e) {
 				vocabulary = null;
 				Log.e(TAG, "Le parsing du fichier JSON a échoué");
 			}
@@ -93,5 +106,26 @@ public class Global extends Application {
 
 	public static void unloadClassifiers() {
 		classes = null;
+	}
+	
+	private static List<Float> tabStringtoFloat(String tab)
+	{
+		List<Float> tabReturn = null;
+		if(tab != null)
+		{
+			String[] tabString = tab.split(",");
+			tabReturn = new LinkedList<Float>();
+			for(String s : tabString)
+			{
+				try 
+				{
+					tabReturn.add(Float.valueOf(s));
+				} catch (NumberFormatException e)
+				{
+					Log.e(TAG, "Le parsing du fichier YML a échoué");
+				}
+			}
+		}
+		return tabReturn;
 	}
 }

@@ -101,13 +101,6 @@ public class ShowAnalyse extends Activity {
 		/*
 		Part of the code to compute BoW with ORB:
 		
-		for( all your images )
-		{
-		    // Detect interesting points
-		    orb(img, Mat(), keypoints, descriptors);
-		    // Keep characteristics of images for further clustering.
-		    characteristics.push_back(descriptors);
-		}
 		// Create the BOW object with K classes
 		BOWKMeansTrainer bow(K);
 		for( all your descriptors )
@@ -132,21 +125,20 @@ public class ShowAnalyse extends Activity {
 		
 		
 		//TODO Chargement du vocabulaire
-		/*vocabulary = Global.getVocabularyFileName(homeURL + indexFile);
 		if(vocabulary != null)
 		{
-			Mat vocab = Global.getVocabulary(homeURL + vocabulary);*/
+			/*Mat vocab = Global.Vocabulary(homeURL + vocabulary);
 		
 			//TODO Chargement des classifiers
 			List<Classe> classifiers = new LinkedList<Classe>();
-			classifiers.addAll(Global.parseClasses(homeURL + indexFile));
+			classifiers.addAll(Global.parseClasses(homeURL + indexFile));*/
 		
 		//TODO POUR CHAQUE CLASSIFIER - CALCUL & ANALYSE DE l'HISTO
 		
 		//TODO Détermination du 'best match'
 		
 		//TODO return value = La 'classe' la plus proche
-		//}
+		}
 		return null;
 	}
 	
@@ -166,8 +158,10 @@ public class ShowAnalyse extends Activity {
 	        }
 		}
 		
-	    protected void onPostExecute() {  
+		@Override
+	    protected void onPostExecute(Integer percent) {  
 	    	Global.parseClasses(result);
+			new DownloadHTTPFileVocab().execute(homeURL + Global.vocabFile);
 	    }
 	}
 	
@@ -187,7 +181,8 @@ public class ShowAnalyse extends Activity {
 	        }
 		}
 		
-	    protected void onPostExecute() {  
+		@Override
+	    protected void onPostExecute(Integer percent) {  
 	    	Global.parseVocabulary(result);
 	    }
 	}
@@ -208,7 +203,8 @@ public class ShowAnalyse extends Activity {
 	        }
 		}
 		
-	    protected void onPostExecute() {  
+		@Override
+	    protected void onPostExecute(Integer percent) {  
 	    	//Global.parseClassifiers(result);
 	    }
 	}
