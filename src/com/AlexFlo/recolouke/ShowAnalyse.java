@@ -1,8 +1,6 @@
 package com.AlexFlo.recolouke;
 
-import java.util.LinkedList;
-import java.util.List;
-
+import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.DescriptorExtractor;
@@ -11,6 +9,7 @@ import org.opencv.features2d.FeatureDetector;
 import com.example.recolouke.R;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class ShowAnalyse extends Activity {
 
@@ -32,6 +32,13 @@ public class ShowAnalyse extends Activity {
 	final static String trainImagesDirectory = "test-images/";
 	final static String testImages = "test_images.txt";
 	final static String trainImages = "test_images.txt";
+	
+	static {
+		if (!OpenCVLoader.initDebug()) {
+			// ERROR - Initialization Error
+			Log.e(TAG, "OpenCV - Initialization Error");
+		}
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +56,11 @@ public class ShowAnalyse extends Activity {
 
 		((ImageView) findViewById(R.id.imgAnalyzed)).setImageBitmap(Global.IMG_SELECTED);
 
-		//TODO 
-		// Working comparison
+		//TODO Working comparison
+		Mat scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED)
+				, FeatureDetector.ORB
+				, DescriptorExtractor.ORB);
+		
 		new DownloadHTTPFileIndex().execute(homeURL + indexFile);
 	}
 
@@ -96,7 +106,7 @@ public class ShowAnalyse extends Activity {
 		return _descriptors_scene;
 	}
 
-	private String testClassifiers()
+	private String testClassifiers(Mat sceneDesc)
 	{
 		/*
 		Part of the code to compute BoW with ORB:
@@ -146,11 +156,44 @@ public class ShowAnalyse extends Activity {
 	class DownloadHTTPFileIndex extends AsyncTask<String, Integer, Integer> 
 	{
 		String result = null;
+		ProgressDialog progressDialog;
+		
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            progressDialog = ProgressDialog.show(ShowAnalyse.this,
+                    "Comparaison en cours",
+                    "Téléchargement de l'index");
+
+            progressDialog.setCanceledOnTouchOutside(false);
+        }
 
 		@Override
 		protected Integer doInBackground(String... params) {
-	        try {
-	        	result = URLReader.readURLData(params[0]);
+			
+			try {
+				publishProgress(0);
+				
+				//(DEV ONLY)
+				try {
+	                Thread.sleep(1000);
+	            } catch (InterruptedException e) {
+	                e.printStackTrace();
+	            }
+				//END REGION
+				
+	        	result = URLReader.readURLData(params[0]);				
+				publishProgress(100);
+		        
+				//(DEV ONLY)
+				try {
+	                Thread.sleep(1000);
+	            } catch (InterruptedException e) {
+	                e.printStackTrace();
+	            }
+				//END REGION
+				
 	        	return 0;
 	        } catch (Exception e) {
 	            Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
@@ -158,10 +201,25 @@ public class ShowAnalyse extends Activity {
 	        }
 		}
 		
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            progressDialog.setMessage("Téléchargement du fichier d'index...\t " + String.valueOf(values[0]) + '%');
+        }
+		
 		@Override
 	    protected void onPostExecute(Integer percent) {  
 	    	Global.parseClasses(result);
-			new DownloadHTTPFileVocab().execute(homeURL + Global.vocabFile);
+			//new DownloadHTTPFileVocab().execute(homeURL + Global.vocabFile);
+	    	
+	    	//Filenames of the classifiers to download
+	    	String[] clasFileNames = Global.getClassifiersFileNames();
+	    	
+	    	Toast.makeText(ShowAnalyse.this,
+                    "Comparaison terminée",
+                    Toast.LENGTH_LONG).show();
+
+            progressDialog.dismiss();
 	    }
 	}
 	

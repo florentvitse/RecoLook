@@ -20,13 +20,6 @@ public class Global extends Application {
 	static String vocabFile = null;
 	static List<Classe> classes = null;
 	static Mat vocabulary = null;
-	
-	static {
-		if (!OpenCVLoader.initDebug()) {
-			// ERROR - Initialization Error
-			Log.e(TAG, "OpenCV - Initialization Error");
-		}
-	}
 
 	public static Mat parseVocabulary(String jsonFile) {
 		if (vocabulary == null) {
@@ -38,20 +31,18 @@ public class Global extends Application {
 	public static void loadVocabulary(String ymlFile) {
 		if (ymlFile != null) {
 			try {
-				int startArray = ymlFile.indexOf("data:") + 7;				
-				// TODO LOAD THE MAT VOCABULARY
+				int startArray = ymlFile.indexOf("data:") + 7;
 				String tab = ymlFile.substring(startArray, (ymlFile.length()));
 				List<Float> floatVocab = new LinkedList<Float>();
-				floatVocab.addAll( tabStringtoFloat(tab) );
-				//vocabulary = new Mat(50, 32, CvType.CV_32F);
+				floatVocab.addAll(tabStringtoFloat(tab));
 				vocabulary = org.opencv.utils.Converters.vector_float_to_Mat(floatVocab);
 			} catch (Exception e) {
 				vocabulary = null;
-				Log.e(TAG, "Le parsing du fichier JSON a échoué");
+				Log.e(TAG, "Erreur lors de la transcription du vocabulaire");
 			}
 		}
 	}
-	
+
 	public static void unloadVocabulary() {
 		vocabulary = null;
 	}
@@ -107,25 +98,36 @@ public class Global extends Application {
 	public static void unloadClassifiers() {
 		classes = null;
 	}
-	
-	private static List<Float> tabStringtoFloat(String tab)
-	{
+
+	private static List<Float> tabStringtoFloat(String tab) {
 		List<Float> tabReturn = null;
-		if(tab != null)
-		{
+		if (tab != null) {
 			String[] tabString = tab.split(",");
 			tabReturn = new LinkedList<Float>();
-			for(String s : tabString)
-			{
-				try 
-				{
+			for (String s : tabString) {
+				try {
 					tabReturn.add(Float.valueOf(s));
-				} catch (NumberFormatException e)
-				{
+				} catch (NumberFormatException e) {
 					Log.e(TAG, "Le parsing du fichier YML a échoué");
 				}
 			}
 		}
 		return tabReturn;
+	}
+
+	public static String[] getClassifiersFileNames() {
+		if (classes == null) {
+			return null;
+		} else {
+			String[] filenames = new String[classes.size()];
+			int index = 0;
+			for(Classe el : classes)
+			{
+				filenames[index] = new String();
+				filenames[index] = el.getClassifierFile();
+				index++;
+			}
+			return filenames;
+		}
 	}
 }
