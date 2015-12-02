@@ -21,9 +21,9 @@ public class Global extends Application {
 	static List<Classe> classes = null;
 	static Mat vocabulary = null;
 
-	public static Mat parseVocabulary(String jsonFile) {
+	public static Mat parseVocabulary(String ymlFile) {
 		if (vocabulary == null) {
-			loadVocabulary(jsonFile);
+			loadVocabulary(ymlFile);
 		}
 		return vocabulary;
 	}

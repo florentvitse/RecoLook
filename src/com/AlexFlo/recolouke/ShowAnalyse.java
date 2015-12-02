@@ -23,23 +23,29 @@ import android.widget.Toast;
 public class ShowAnalyse extends Activity {
 
 	final static String TAG = "[ShowAnalyse]";
-	
+
 	final static String homeURL = "http://www-rech.telecom-lille.fr/freeorb/";
 	final static String indexFile = "index.json";
-	static String vocabulary = "vocabulary.yml";
+	// final static String vocabulary = "vocabulary.yml";
 	final static String classifiersDirectory = "classifiers/";
 	final static String testImagesDirectory = "test-images/";
 	final static String trainImagesDirectory = "test-images/";
 	final static String testImages = "test_images.txt";
 	final static String trainImages = "test_images.txt";
-	
+
+	Mat scene_descriptors;
+	Mat[] matClassifiers;
+
 	static {
 		if (!OpenCVLoader.initDebug()) {
 			// ERROR - Initialization Error
 			Log.e(TAG, "OpenCV - Initialization Error");
 		}
 	}
-	
+
+	ProgressDialog progressDialog;
+	static int numberClassiferDL = 0;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,12 +62,20 @@ public class ShowAnalyse extends Activity {
 
 		((ImageView) findViewById(R.id.imgAnalyzed)).setImageBitmap(Global.IMG_SELECTED);
 
-		//TODO Working comparison
-		Mat scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED)
-				, FeatureDetector.ORB
-				, DescriptorExtractor.ORB);
-		
-		new DownloadHTTPFileIndex().execute(homeURL + indexFile);
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setTitle("Comparaison en cours...");
+		progressDialog.setCanceledOnTouchOutside(false);
+		progressDialog.setIndeterminate(false);
+		progressDialog.setMax(100);
+		// progressDialog.setIcon();
+		progressDialog.setCancelable(true);
+		progressDialog.show();
+
+		// TODO Working comparison
+		//scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED), FeatureDetector.ORB,
+		//DescriptorExtractor.ORB);
+
+		new AnalyseImage().execute();
 	}
 
 	@Override
@@ -82,188 +96,239 @@ public class ShowAnalyse extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
-	
-	// Created Method
-	private Mat analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
-		// Creation of the detector
-		// FeatureDetector.ORB to give to the method here (generic method also)
-		FeatureDetector _detector = FeatureDetector.create(detector);
-		// Creation of the descriptor
-		// DescriptorExtractor.ORB to give to the method here (generic method
-		// also)
-		DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
 
-		// Object that will store the keypoint of the scene
-		MatOfKeyPoint _scenekeypoints = new MatOfKeyPoint();
-		// Detection of the keyPoints of the scene
-		_detector.detect(srcGrayscale, _scenekeypoints);
-
-
-		Mat _descriptors_scene = new Mat();
-		// Extraction of the descriptors
-		_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
-		return _descriptors_scene;
-	}
-
-	private String testClassifiers(Mat sceneDesc)
-	{
+	private String testClassifiers(Mat sceneDesc) {
 		/*
-		Part of the code to compute BoW with ORB:
-		
-		// Create the BOW object with K classes
-		BOWKMeansTrainer bow(K);
-		for( all your descriptors )
-		{
-		    // Convert characteristics vector to float
-		    // This is require by BOWTrainer class
-		    Mat descr;
-		    characteristics[k].convertTo(descr, CV_32F);
-		    // Add it to the BOW object
-		    bow.add(descr);
-		}
-		// Perform the clustering of stored vectors
-		Mat voc = bow.cluster();
-		You need to convert features from CV_8U to CV_32F, because bag of words object expects float descriptors.
-		It is not required for SIFT or SURF descriptors because they are in float
-		*/
-		
-		//Extraction of descriptors of the image
-		/*Mat scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED)
-				, FeatureDetector.ORB
-				, DescriptorExtractor.ORB);*/
-		
-		
-		//TODO Chargement du vocabulaire
-		if(vocabulary != null)
-		{
-			/*Mat vocab = Global.Vocabulary(homeURL + vocabulary);
-		
-			//TODO Chargement des classifiers
-			List<Classe> classifiers = new LinkedList<Classe>();
-			classifiers.addAll(Global.parseClasses(homeURL + indexFile));*/
-		
-		//TODO POUR CHAQUE CLASSIFIER - CALCUL & ANALYSE DE l'HISTO
-		
-		//TODO Détermination du 'best match'
-		
-		//TODO return value = La 'classe' la plus proche
-		}
+		 * Part of the code to compute BoW with ORB:
+		 * 
+		 * // Create the BOW object with K classes BOWKMeansTrainer bow(K); for(
+		 * all your descriptors ) { // Convert characteristics vector to float
+		 * // This is require by BOWTrainer class Mat descr;
+		 * characteristics[k].convertTo(descr, CV_32F); // Add it to the BOW
+		 * object bow.add(descr); } // Perform the clustering of stored vectors
+		 * Mat voc = bow.cluster(); You need to convert features from CV_8U to
+		 * CV_32F, because bag of words object expects float descriptors. It is
+		 * not required for SIFT or SURF descriptors because they are in float
+		 */
+
+		// Extraction of descriptors of the image
+		/*
+		 * Mat scene_descriptors =
+		 * analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED)
+		 * , FeatureDetector.ORB , DescriptorExtractor.ORB);
+		 */
+
+		// TODO Chargement du vocabulaire
+		// if(vocabulary != null)
+		// {
+		/*
+		 * Mat vocab = Global.Vocabulary(homeURL + vocabulary);
+		 * 
+		 * //TODO Chargement des classifiers List<Classe> classifiers = new
+		 * LinkedList<Classe>(); classifiers.addAll(Global.parseClasses(homeURL
+		 * + indexFile));
+		 */
+
+		// TODO POUR CHAQUE CLASSIFIER - CALCUL & ANALYSE DE l'HISTO
+
+		// TODO Détermination du 'best match'
+
+		// TODO return value = La 'classe' la plus proche
+		// }
 		return null;
 	}
-	
-	// Implementation of AsyncTask used to download files asynchronous
-	class DownloadHTTPFileIndex extends AsyncTask<String, Integer, Integer> 
-	{
-		String result = null;
-		ProgressDialog progressDialog;
+
+	// Implementation of AsyncTask used to analyse the image
+	class AnalyseImage extends AsyncTask<Void, Integer, Void> {
 		
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
+		Mat analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
+			// Creation of the detector
+			// FeatureDetector.ORB to give to the method here (generic method also)
+			FeatureDetector _detector = FeatureDetector.create(detector);
+			// Creation of the descriptor
+			// DescriptorExtractor.ORB to give to the method here (generic method
+			// also)
+			DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
 
-            progressDialog = ProgressDialog.show(ShowAnalyse.this,
-                    "Comparaison en cours",
-                    "Téléchargement de l'index");
+			// Object that will store the keypoint of the scene
+			MatOfKeyPoint _scenekeypoints = new MatOfKeyPoint();
+			// Detection of the keyPoints of the scene
+			_detector.detect(srcGrayscale, _scenekeypoints);
 
-            progressDialog.setCanceledOnTouchOutside(false);
-        }
+			Mat _descriptors_scene = new Mat();
+			// Extraction of the descriptors
+			_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
+			return _descriptors_scene;
+		}
 
 		@Override
-		protected Integer doInBackground(String... params) {
-			
+		protected Void doInBackground(Void... params) {
+
 			try {
 				publishProgress(0);
 				
-				//(DEV ONLY)
-				try {
-	                Thread.sleep(1000);
-	            } catch (InterruptedException e) {
-	                e.printStackTrace();
-	            }
-				//END REGION
+				//Analyse of the image chosen or taken
+				scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED),
+						FeatureDetector.ORB,
+						DescriptorExtractor.ORB);
 				
-	        	result = URLReader.readURLData(params[0]);				
+			} catch (Exception e) {
+				Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			
+			new DownloadHTTPFileIndex().execute(homeURL + indexFile);
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+			progressDialog.setMessage("Analyse de l'image...");
+		}
+	}	
+	
+	// Implementation of AsyncTask used to download files asynchronous
+	class DownloadHTTPFileIndex extends AsyncTask<String, Integer, String> {
+
+		@Override
+		protected String doInBackground(String... params) {
+			
+			try {
+				publishProgress(0);
+
+				// (DEV ONLY)
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				// END REGION
+
+				String result = URLReader.readURLData(params[0]);
 				publishProgress(100);
-		        
-				//(DEV ONLY)
+
+				// (DEV ONLY)
 				try {
-	                Thread.sleep(1000);
-	            } catch (InterruptedException e) {
-	                e.printStackTrace();
-	            }
-				//END REGION
-				
-	        	return 0;
-	        } catch (Exception e) {
-	            Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
-	            return -1;
-	        }
-		}
-		
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            progressDialog.setMessage("Téléchargement du fichier d'index...\t " + String.valueOf(values[0]) + '%');
-        }
-		
-		@Override
-	    protected void onPostExecute(Integer percent) {  
-	    	Global.parseClasses(result);
-			//new DownloadHTTPFileVocab().execute(homeURL + Global.vocabFile);
-	    	
-	    	//Filenames of the classifiers to download
-	    	String[] clasFileNames = Global.getClassifiersFileNames();
-	    	
-	    	Toast.makeText(ShowAnalyse.this,
-                    "Comparaison terminée",
-                    Toast.LENGTH_LONG).show();
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				// END REGION
 
-            progressDialog.dismiss();
-	    }
+				return result;
+			} catch (Exception e) {
+				Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
+				return null;
+			}
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+			progressDialog.setMessage("Téléchargement du fichier d'index...\t " + String.valueOf(values[0]) + '%');
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			Global.parseClasses(result);
+
+			// (DEV ONLY)
+			/*
+			 * Toast.makeText(ShowAnalyse.this, clasFileNames[0],
+			 * Toast.LENGTH_LONG).show();
+			 */
+			// END REGION
+
+			new DownloadHTTPFileVocab().execute(homeURL + Global.vocabFile);
+		}
 	}
-	
+
 	// Second Implementation of AsyncTask used to download files asynchronous
-	class DownloadHTTPFileVocab extends AsyncTask<String, Integer, Integer> 
-	{
-		String result = null;
+	class DownloadHTTPFileVocab extends AsyncTask<String, Integer, String> {
 
 		@Override
-		protected Integer doInBackground(String... params) {
-	        try {
-	        	result = URLReader.readURLData(params[0]);
-	        	return 0;
-	        } catch (Exception e) {
-	            Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
-	            return -1;
-	        }
+		protected String doInBackground(String... params) {
+			
+			try {
+				publishProgress(0);
+
+				// (DEV ONLY)
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				// END REGION
+
+				String result = URLReader.readURLData(params[0]);
+				publishProgress(100);
+
+				// (DEV ONLY)
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				// END REGION
+
+				return result;
+			} catch (Exception e) {
+				Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			Global.parseVocabulary(result);
+
+			// Filenames of the classifiers to download
+			String[] clasFileNames = Global.getClassifiersFileNames();
+			numberClassiferDL = clasFileNames.length;
+			matClassifiers = new Mat[numberClassiferDL];
+			
+			//TODO foreach classifiers, download the associated file
+			for(String cl : clasFileNames)
+			{
+				//TODO Launch asyntask
+			}
+			
+			progressDialog.dismiss();
+			
+			Toast.makeText(ShowAnalyse.this, "Comparaison terminée", Toast.LENGTH_LONG).show();
 		}
 		
 		@Override
-	    protected void onPostExecute(Integer percent) {  
-	    	Global.parseVocabulary(result);
-	    }
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+			progressDialog.setMessage("Téléchargement du fichier vocabulaire...\t " + String.valueOf(values[0]) + '%');
+		}
 	}
-	
+
 	// Third Implementation of AsyncTask used to download files asynchronous
-	class DownloadHTTPFileClassifier extends AsyncTask<String, Integer, Integer> 
-	{
+	class DownloadHTTPFileClassifier extends AsyncTask<String, Integer, Integer> {
 		String result = null;
 
 		@Override
 		protected Integer doInBackground(String... params) {
-	        try {
-	        	result = URLReader.readURLData(params[0]);
-	        	return 0;
-	        } catch (Exception e) {
-	            Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
-	            return -1;
-	        }
+			try {
+				result = URLReader.readURLData(params[0]);
+				return 0;
+			} catch (Exception e) {
+				Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
+				return -1;
+			}
 		}
-		
+
 		@Override
-	    protected void onPostExecute(Integer percent) {  
-	    	//Global.parseClassifiers(result);
-	    }
+		protected void onPostExecute(Integer percent) {
+			// Global.parseClassifiers(result);
+		}
 	}
 }
