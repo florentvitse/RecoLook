@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,10 +33,15 @@ public class Global extends Application {
 		if (ymlFile != null) {
 			try {
 				int startArray = ymlFile.indexOf("data:") + 7;
-				String tab = ymlFile.substring(startArray, (ymlFile.length()));
+				String tab = ymlFile.substring(startArray, (ymlFile.length() - 2));
 				List<Float> floatVocab = new LinkedList<Float>();
 				floatVocab.addAll(tabStringtoFloat(tab));
-				vocabulary = org.opencv.utils.Converters.vector_float_to_Mat(floatVocab);
+				if(floatVocab.get(0) != null)
+				{
+					vocabulary = org.opencv.utils.Converters.vector_float_to_Mat(floatVocab);
+				} else {
+					throw new Exception();
+				}
 			} catch (Exception e) {
 				vocabulary = null;
 				Log.e(TAG, "Erreur lors de la transcription du vocabulaire");
@@ -106,28 +112,13 @@ public class Global extends Application {
 			tabReturn = new LinkedList<Float>();
 			for (String s : tabString) {
 				try {
-					tabReturn.add(Float.valueOf(s));
+					tabReturn.add(Float.valueOf(s.trim()));
 				} catch (NumberFormatException e) {
 					Log.e(TAG, "Le parsing du fichier YML a échoué");
+					return null;
 				}
 			}
 		}
 		return tabReturn;
-	}
-
-	public static String[] getClassifiersFileNames() {
-		if (classes == null) {
-			return null;
-		} else {
-			String[] filenames = new String[classes.size()];
-			int index = 0;
-			for(Classe el : classes)
-			{
-				filenames[index] = new String();
-				filenames[index] = el.getClassifierFile();
-				index++;
-			}
-			return filenames;
-		}
 	}
 }

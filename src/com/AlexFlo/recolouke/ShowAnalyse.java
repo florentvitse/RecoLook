@@ -1,5 +1,8 @@
 package com.AlexFlo.recolouke;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
@@ -233,6 +236,7 @@ public class ShowAnalyse extends Activity {
 			progressDialog.setMessage("Téléchargement du fichier d'index...\t " + String.valueOf(values[0]) + '%');
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected void onPostExecute(String result) {
 
@@ -245,15 +249,31 @@ public class ShowAnalyse extends Activity {
 			 */
 			// END REGION
 
-			new DownloadHTTPFileVocab().execute(homeURL + Global.vocabFile);
+			List<String> files = new ArrayList<String>();
+			files.add(homeURL + Global.vocabFile);
+			for(Classe c : Global.classes)
+			{
+				files.add(c.getClassifierFile());
+			}
+			new DownloadHTTPFiles().execute(files);
 		}
 	}
 
 	// Second Implementation of AsyncTask used to download files asynchronous
-	class DownloadHTTPFileVocab extends AsyncTask<String, Integer, String> {
+	class DownloadHTTPFiles extends AsyncTask<List<String>, Integer, String> {
+
+		boolean inDLClassifiers = false;
+		int nbClassifierToDL = 0;
 
 		@Override
-		protected String doInBackground(String... params) {
+		protected String doInBackground(List<String>... params) {
+			
+			nbClassifierToDL = params[0].size() - 1;
+			
+			for(String p : params[0])
+			{
+				Log.e(TAG, p);
+			}
 			
 			try {
 				publishProgress(0);
@@ -266,7 +286,7 @@ public class ShowAnalyse extends Activity {
 				}
 				// END REGION
 
-				String result = URLReader.readURLData(params[0]);
+				String result = URLReader.readURLData(params[0].get(0));
 				publishProgress(100);
 
 				// (DEV ONLY)
@@ -276,6 +296,8 @@ public class ShowAnalyse extends Activity {
 					e.printStackTrace();
 				}
 				// END REGION
+				
+				inDLClassifiers = true;
 
 				return result;
 			} catch (Exception e) {
@@ -287,17 +309,6 @@ public class ShowAnalyse extends Activity {
 		@Override
 		protected void onPostExecute(String result) {
 			Global.parseVocabulary(result);
-
-			// Filenames of the classifiers to download
-			String[] clasFileNames = Global.getClassifiersFileNames();
-			numberClassiferDL = clasFileNames.length;
-			matClassifiers = new Mat[numberClassiferDL];
-			
-			//TODO foreach classifiers, download the associated file
-			for(String cl : clasFileNames)
-			{
-				//TODO Launch asyntask
-			}
 			
 			progressDialog.dismiss();
 			
@@ -307,28 +318,12 @@ public class ShowAnalyse extends Activity {
 		@Override
 		protected void onProgressUpdate(Integer... values) {
 			super.onProgressUpdate(values);
-			progressDialog.setMessage("Téléchargement du fichier vocabulaire...\t " + String.valueOf(values[0]) + '%');
-		}
-	}
-
-	// Third Implementation of AsyncTask used to download files asynchronous
-	class DownloadHTTPFileClassifier extends AsyncTask<String, Integer, Integer> {
-		String result = null;
-
-		@Override
-		protected Integer doInBackground(String... params) {
-			try {
-				result = URLReader.readURLData(params[0]);
-				return 0;
-			} catch (Exception e) {
-				Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
-				return -1;
+			if(!inDLClassifiers)
+			{
+				progressDialog.setMessage("Téléchargement du fichier vocabulaire...\t " + String.valueOf(values[0]) + '%');
+			} else {
+				progressDialog.setMessage("Téléchargement des fichiers classifiers...\t " + values[0] + '/' + nbClassifierToDL);
 			}
-		}
-
-		@Override
-		protected void onPostExecute(Integer percent) {
-			// Global.parseClassifiers(result);
 		}
 	}
 }
