@@ -105,7 +105,7 @@ public class Global extends Application {
 		classes = null;
 	}
 
-	private static List<Float> tabStringtoFloat(String tab) {
+	public static List<Float> tabStringtoFloat(String tab) {
 		List<Float> tabReturn = null;
 		if (tab != null) {
 			String[] tabString = tab.split(",");

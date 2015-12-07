@@ -1,6 +1,7 @@
 package com.AlexFlo.recolouke;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.opencv.android.OpenCVLoader;
@@ -47,7 +48,6 @@ public class ShowAnalyse extends Activity {
 	}
 
 	ProgressDialog progressDialog;
-	static int numberClassiferDL = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -241,7 +241,8 @@ public class ShowAnalyse extends Activity {
 		protected void onPostExecute(String result) {
 
 			Global.parseClasses(result);
-
+			matClassifiers = new Mat[Global.classes.size()];
+			
 			// (DEV ONLY)
 			/*
 			 * Toast.makeText(ShowAnalyse.this, clasFileNames[0],
@@ -250,7 +251,7 @@ public class ShowAnalyse extends Activity {
 			// END REGION
 
 			List<String> files = new ArrayList<String>();
-			files.add(homeURL + Global.vocabFile);
+			files.add(Global.vocabFile);
 			for(Classe c : Global.classes)
 			{
 				files.add(c.getClassifierFile());
@@ -286,7 +287,7 @@ public class ShowAnalyse extends Activity {
 				}
 				// END REGION
 
-				String result = URLReader.readURLData(params[0].get(0));
+				String result = URLReader.readURLData(homeURL + params[0].get(0));
 				publishProgress(100);
 
 				// (DEV ONLY)
@@ -298,11 +299,45 @@ public class ShowAnalyse extends Activity {
 				// END REGION
 				
 				inDLClassifiers = true;
+				
+				for(int numClasInProgress = 0; numClasInProgress < nbClassifierToDL; numClasInProgress++)
+				{
+					publishProgress(numClasInProgress + 1);
+					
+					//parseClassifier(numClasInProgress, params[0].get(numClasInProgress + 1), URLReader.readURLData(homeURL + classifiersDirectory + params[0].get(numClasInProgress + 1)) );
+					
+					// (DEV ONLY)
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					// END REGION
+				}			
 
 				return result;
 			} catch (Exception e) {
 				Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
 				return null;
+			}
+		}
+		
+		private void parseClassifier(int index, String filename, String xmlFile)
+		{
+			if (xmlFile != null) {
+				try {
+					String tab = xmlFile.substring(10, (xmlFile.length() - 2));
+					List<Float> floatVocab = new LinkedList<Float>();
+					floatVocab.addAll(Global.tabStringtoFloat(tab));
+					if(floatVocab.get(0) != null)
+					{
+						matClassifiers[index] = org.opencv.utils.Converters.vector_float_to_Mat(floatVocab);
+					} else {
+						throw new Exception();
+					}
+				} catch (Exception e) {
+					Log.e(TAG, "Erreur lors du parsing du classifier : " + filename);
+				}
 			}
 		}
 
