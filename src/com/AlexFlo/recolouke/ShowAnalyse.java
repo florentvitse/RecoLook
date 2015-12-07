@@ -304,7 +304,7 @@ public class ShowAnalyse extends Activity {
 				{
 					publishProgress(numClasInProgress + 1);
 					
-					//parseClassifier(numClasInProgress, params[0].get(numClasInProgress + 1), URLReader.readURLData(homeURL + classifiersDirectory + params[0].get(numClasInProgress + 1)) );
+					parseClassifier(numClasInProgress, params[0].get(numClasInProgress + 1), URLReader.readURLData(homeURL + classifiersDirectory + params[0].get(numClasInProgress + 1)) );
 					
 					// (DEV ONLY)
 					try {
@@ -326,9 +326,8 @@ public class ShowAnalyse extends Activity {
 		{
 			if (xmlFile != null) {
 				try {
-					String tab = xmlFile.substring(10, (xmlFile.length() - 2));
 					List<Float> floatVocab = new LinkedList<Float>();
-					floatVocab.addAll(Global.tabStringtoFloat(tab));
+					floatVocab.addAll(Global.XMLStringtoFloat(xmlFile));
 					if(floatVocab.get(0) != null)
 					{
 						matClassifiers[index] = org.opencv.utils.Converters.vector_float_to_Mat(floatVocab);

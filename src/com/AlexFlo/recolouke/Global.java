@@ -4,14 +4,10 @@ import android.app.Application;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.json.*;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 public class Global extends Application {
@@ -109,6 +105,27 @@ public class Global extends Application {
 		List<Float> tabReturn = null;
 		if (tab != null) {
 			String[] tabString = tab.split(",");
+			tabReturn = new LinkedList<Float>();
+			for (String s : tabString) {
+				try {
+					tabReturn.add(Float.valueOf(s.trim()));
+				} catch (NumberFormatException e) {
+					Log.e(TAG, "Le parsing du fichier YML a échoué");
+					return null;
+				}
+			}
+		}
+		return tabReturn;
+	}
+	
+	public static List<Float> XMLStringtoFloat(String xml) {
+		List<Float> tabReturn = null;
+		if (xml != null) {
+			
+			//TODO Genuine Parsing
+			String[] tabString = null;
+			//END
+			
 			tabReturn = new LinkedList<Float>();
 			for (String s : tabString) {
 				try {
