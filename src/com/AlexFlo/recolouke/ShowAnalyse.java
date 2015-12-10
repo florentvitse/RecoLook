@@ -1,19 +1,27 @@
 package com.AlexFlo.recolouke;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.DescriptorExtractor;
 import org.opencv.features2d.FeatureDetector;
+import org.opencv.ml.CvSVM;
 
 import com.example.recolouke.R;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,7 +46,7 @@ public class ShowAnalyse extends Activity {
 	final static String trainImages = "test_images.txt";
 
 	Mat scene_descriptors;
-	Mat[] matClassifiers;
+	CvSVM[] classifiers;
 
 	static {
 		if (!OpenCVLoader.initDebug()) {
@@ -241,7 +249,7 @@ public class ShowAnalyse extends Activity {
 		protected void onPostExecute(String result) {
 
 			Global.parseClasses(result);
-			matClassifiers = new Mat[Global.classes.size()];
+			classifiers = new CvSVM[Global.classes.size()];
 			
 			// (DEV ONLY)
 			/*
@@ -304,7 +312,7 @@ public class ShowAnalyse extends Activity {
 				{
 					publishProgress(numClasInProgress + 1);
 					
-					parseClassifier(numClasInProgress, params[0].get(numClasInProgress + 1), URLReader.readURLData(homeURL + classifiersDirectory + params[0].get(numClasInProgress + 1)) );
+					parseClassifier(numClasInProgress, params[0].get(numClasInProgress + 1) );
 					
 					// (DEV ONLY)
 					try {
@@ -322,22 +330,36 @@ public class ShowAnalyse extends Activity {
 			}
 		}
 		
-		private void parseClassifier(int index, String filename, String xmlFile)
+		private void parseClassifier(int index, String filename) throws Exception
 		{
-			if (xmlFile != null) {
-				try {
-					List<Float> floatVocab = new LinkedList<Float>();
-					floatVocab.addAll(Global.XMLStringtoFloat(xmlFile));
-					if(floatVocab.get(0) != null)
-					{
-						matClassifiers[index] = org.opencv.utils.Converters.vector_float_to_Mat(floatVocab);
-					} else {
-						throw new Exception();
+			//If file exists, no need to download again and parsing too
+			if(!existingFiles(filename))
+			{
+				String xmlFile = URLReader.readURLData(homeURL + classifiersDirectory + filename);
+				if (xmlFile != null) {
+					try {		
+					
+						FileOutputStream fos = openFileOutput(filename, Context.MODE_PRIVATE);
+						fos.write(xmlFile.getBytes());
+						fos.close();
+						
+						classifiers[index] = new CvSVM();
+						// filename of the file is enough, no need of the full path
+						classifiers[index].load( filename );
+					} catch (Exception e) {
+						Log.e(TAG, "Erreur lors du parsing du classifier : " + filename);
 					}
-				} catch (Exception e) {
-					Log.e(TAG, "Erreur lors du parsing du classifier : " + filename);
 				}
 			}
+		}
+		
+		private boolean existingFiles(String filename)
+		{
+			File file = getFileStreamPath(filename);
+		    if(file == null || !file.exists()) {
+		        return false;
+		    }
+		    return true;
 		}
 
 		@Override
