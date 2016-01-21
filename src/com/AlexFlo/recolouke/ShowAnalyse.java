@@ -1,16 +1,15 @@
 package com.AlexFlo.recolouke;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
+import org.bytedeco.javacpp.opencv_features2d.BOWImgDescriptorExtractor;
+import org.bytedeco.javacpp.opencv_features2d.FlannBasedMatcher;
+import org.bytedeco.javacpp.opencv_nonfree.SIFT;
+
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.DescriptorExtractor;
@@ -73,6 +72,18 @@ public class ShowAnalyse extends Activity {
 
 		((ImageView) findViewById(R.id.imgAnalyzed)).setImageBitmap(Global.IMG_SELECTED);
 
+		//create SIFT feature point extracter 
+        final SIFT detector;  
+        // default parameters ""opencv2/features2d/features2d.hpp""
+      	detector = new SIFT(0, 3, 0.04, 10, 1.6);
+      				
+      	//create a matcher with FlannBased Euclidien distance (possible also with BruteForce-Hamming)
+      	final FlannBasedMatcher matcher;
+      	matcher = new FlannBasedMatcher();
+      		        
+      	//create BoF (or BoW) descriptor extractor
+      	final BOWImgDescriptorExtractor bowide = new BOWImgDescriptorExtractor(detector.asDescriptorExtractor(), matcher);
+		
 		progressDialog = new ProgressDialog(this);
 		progressDialog.setTitle("Comparaison en cours...");
 		progressDialog.setCanceledOnTouchOutside(false);

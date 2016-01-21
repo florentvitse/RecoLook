@@ -6,5 +6,8 @@
 	<classpathentry kind="lib" path="/Users/Florent/Development/android-sdk-macosx/platforms/android-15/android.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="lib" path="libs/javacpp.jar"/>
+	<classpathentry kind="lib" path="libs/javacv.jar"/>
+	<classpathentry kind="lib" path="libs/opencv.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
