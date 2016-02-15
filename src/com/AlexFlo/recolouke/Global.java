@@ -7,12 +7,9 @@ import android.util.Log;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.opencv_core;
 import org.json.*;
-import org.opencv.core.Mat;
-import org.opencv.ml.CvSVM;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 public class Global extends Application {
 
@@ -20,32 +17,30 @@ public class Global extends Application {
 	static Bitmap IMG_SELECTED = null;
 	static String vocabFile = null;
 	static List<Classe> classes = null;
-	static Mat vocabulary = null;
+	static org.bytedeco.javacpp.opencv_core.Mat vocabulary = null;
 
-	public static Mat parseVocabulary(String ymlFile) {
+	public static org.bytedeco.javacpp.opencv_core.Mat parseVocabulary(String vocabFilename) {
 		if (vocabulary == null) {
-			loadVocabulary(ymlFile);
+			loadVocabulary(vocabFilename);
 		}
 		return vocabulary;
 	}
 
-	public static void loadVocabulary(String ymlFile) {
-		if (ymlFile != null) {
-			try {
-				int startArray = ymlFile.indexOf("data:") + 7;
-				String tab = ymlFile.substring(startArray, (ymlFile.length() - 2));
-				List<Float> floatVocab = new LinkedList<Float>();
-				floatVocab.addAll(tabStringtoFloat(tab));
-				if(floatVocab.get(0) != null)
-				{
-					vocabulary = org.opencv.utils.Converters.vector_float_to_Mat(floatVocab);
-				} else {
-					throw new Exception();
-				}
-			} catch (Exception e) {
-				vocabulary = null;
-				Log.e(TAG, "Erreur lors de la transcription du vocabulaire");
-			}
+	public static void loadVocabulary(String vocabFilename) {
+		try {
+			
+			//getApplicationContext().getFilesDir().getPath()			
+			
+			// Loading vocabulary
+            opencv_core.CvFileStorage storage = opencv_core.CvFileStorage.open(vocabFilename, null, 0);
+            Pointer p = opencv_core.cvReadByName(storage, null, vocabFilename, opencv_core.cvAttrList());
+            opencv_core.CvMat cvMat = new opencv_core.CvMat(p);
+            vocabulary = new opencv_core.Mat(cvMat);
+            opencv_core.cvReleaseFileStorage(storage);
+			
+		} catch (Exception e) {
+			vocabulary = null;
+			Log.e(TAG, "Erreur lors de la transcription du vocabulaire");
 		}
 	}
 

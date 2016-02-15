@@ -5,16 +5,14 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_features2d.BOWImgDescriptorExtractor;
 import org.bytedeco.javacpp.opencv_features2d.FlannBasedMatcher;
+import org.bytedeco.javacpp.opencv_features2d.KeyPoint;
+import org.bytedeco.javacpp.opencv_ml.CvSVM;
 import org.bytedeco.javacpp.opencv_nonfree.SIFT;
 
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfKeyPoint;
-import org.opencv.features2d.DescriptorExtractor;
-import org.opencv.features2d.FeatureDetector;
-import org.opencv.ml.CvSVM;
+import static org.bytedeco.javacpp.opencv_highgui.imread;
 
 import com.example.recolouke.R;
 
@@ -35,7 +33,7 @@ public class ShowAnalyse extends Activity {
 
 	final static String TAG = "[ShowAnalyse]";
 
-	final static String homeURL = "http://www-rech.telecom-lille.fr/freeorb/";
+	final static String homeURL = "http://www-rech.telecom-lille.fr/nonfreesift/";
 	final static String indexFile = "index.json";
 	// final static String vocabulary = "vocabulary.yml";
 	final static String classifiersDirectory = "classifiers/";
@@ -44,17 +42,18 @@ public class ShowAnalyse extends Activity {
 	final static String testImages = "test_images.txt";
 	final static String trainImages = "test_images.txt";
 
-	Mat scene_descriptors;
+	Mat response_hist;
 	CvSVM[] classifiers;
 
-	static {
-		if (!OpenCVLoader.initDebug()) {
-			// ERROR - Initialization Error
-			Log.e(TAG, "OpenCV - Initialization Error");
-		}
-	}
-
 	ProgressDialog progressDialog;
+	
+	//create SIFT feature point extracter 
+    final org.bytedeco.javacpp.opencv_nonfree.SIFT SIFTdetector = new SIFT(0, 3, 0.04, 10, 1.6);
+  	// Create a matcher with FlannBased Euclidien distance (possible also with BruteForce-Hamming)
+  	final FlannBasedMatcher matcher = new FlannBasedMatcher(); 		        
+  	// Create BoW descriptor extractor
+  	final BOWImgDescriptorExtractor bowide = new BOWImgDescriptorExtractor(SIFTdetector.asDescriptorExtractor(), matcher);
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,18 +70,6 @@ public class ShowAnalyse extends Activity {
 		});
 
 		((ImageView) findViewById(R.id.imgAnalyzed)).setImageBitmap(Global.IMG_SELECTED);
-
-		//create SIFT feature point extracter 
-        final SIFT detector;  
-        // default parameters ""opencv2/features2d/features2d.hpp""
-      	detector = new SIFT(0, 3, 0.04, 10, 1.6);
-      				
-      	//create a matcher with FlannBased Euclidien distance (possible also with BruteForce-Hamming)
-      	final FlannBasedMatcher matcher;
-      	matcher = new FlannBasedMatcher();
-      		        
-      	//create BoF (or BoW) descriptor extractor
-      	final BOWImgDescriptorExtractor bowide = new BOWImgDescriptorExtractor(detector.asDescriptorExtractor(), matcher);
 		
 		progressDialog = new ProgressDialog(this);
 		progressDialog.setTitle("Comparaison en cours...");
@@ -93,11 +80,7 @@ public class ShowAnalyse extends Activity {
 		progressDialog.setCancelable(true);
 		progressDialog.show();
 
-		// TODO Working comparison
-		//scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED), FeatureDetector.ORB,
-		//DescriptorExtractor.ORB);
-
-		new AnalyseImage().execute();
+		new DownloadHTTPFileIndex().execute(homeURL + indexFile);
 	}
 
 	@Override
@@ -117,102 +100,7 @@ public class ShowAnalyse extends Activity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	private String testClassifiers(Mat sceneDesc) {
-		/*
-		 * Part of the code to compute BoW with ORB:
-		 * 
-		 * // Create the BOW object with K classes BOWKMeansTrainer bow(K); for(
-		 * all your descriptors ) { // Convert characteristics vector to float
-		 * // This is require by BOWTrainer class Mat descr;
-		 * characteristics[k].convertTo(descr, CV_32F); // Add it to the BOW
-		 * object bow.add(descr); } // Perform the clustering of stored vectors
-		 * Mat voc = bow.cluster(); You need to convert features from CV_8U to
-		 * CV_32F, because bag of words object expects float descriptors. It is
-		 * not required for SIFT or SURF descriptors because they are in float
-		 */
-
-		// Extraction of descriptors of the image
-		/*
-		 * Mat scene_descriptors =
-		 * analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED)
-		 * , FeatureDetector.ORB , DescriptorExtractor.ORB);
-		 */
-
-		// TODO Chargement du vocabulaire
-		// if(vocabulary != null)
-		// {
-		/*
-		 * Mat vocab = Global.Vocabulary(homeURL + vocabulary);
-		 * 
-		 * //TODO Chargement des classifiers List<Classe> classifiers = new
-		 * LinkedList<Classe>(); classifiers.addAll(Global.parseClasses(homeURL
-		 * + indexFile));
-		 */
-
-		// TODO POUR CHAQUE CLASSIFIER - CALCUL & ANALYSE DE l'HISTO
-
-		// TODO Détermination du 'best match'
-
-		// TODO return value = La 'classe' la plus proche
-		// }
-		return null;
-	}
-
-	// Implementation of AsyncTask used to analyse the image
-	class AnalyseImage extends AsyncTask<Void, Integer, Void> {
-		
-		Mat analyseScene(Mat srcGrayscale, int detector, int descriptorExtractor) {
-			// Creation of the detector
-			// FeatureDetector.ORB to give to the method here (generic method also)
-			FeatureDetector _detector = FeatureDetector.create(detector);
-			// Creation of the descriptor
-			// DescriptorExtractor.ORB to give to the method here (generic method
-			// also)
-			DescriptorExtractor _descriptor = DescriptorExtractor.create(descriptorExtractor);
-
-			// Object that will store the keypoint of the scene
-			MatOfKeyPoint _scenekeypoints = new MatOfKeyPoint();
-			// Detection of the keyPoints of the scene
-			_detector.detect(srcGrayscale, _scenekeypoints);
-
-			Mat _descriptors_scene = new Mat();
-			// Extraction of the descriptors
-			_descriptor.compute(srcGrayscale, _scenekeypoints, _descriptors_scene);
-			return _descriptors_scene;
-		}
-
-		@Override
-		protected Void doInBackground(Void... params) {
-
-			try {
-				publishProgress(0);
-				
-				//Analyse of the image chosen or taken
-				scene_descriptors = analyseScene(ImageUtility.convertToGrayscaleMat(Global.IMG_SELECTED),
-						FeatureDetector.ORB,
-						DescriptorExtractor.ORB);
-				
-			} catch (Exception e) {
-				Log.e(TAG, "Erreur lors de la lecture du fichier à l'adresse : " + params[0]);
-			}
-			return null;
-		}
-		
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-			
-			new DownloadHTTPFileIndex().execute(homeURL + indexFile);
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... values) {
-			super.onProgressUpdate(values);
-			progressDialog.setMessage("Analyse de l'image...");
-		}
-	}	
+	}		
 	
 	// Implementation of AsyncTask used to download files asynchronous
 	class DownloadHTTPFileIndex extends AsyncTask<String, Integer, String> {
@@ -355,7 +243,7 @@ public class ShowAnalyse extends Activity {
 						fos.close();
 						
 						classifiers[index] = new CvSVM();
-						// filename of the file is enough, no need of the full path
+						// Filename of the file is enough, no need of the full path
 						classifiers[index].load( filename );
 					} catch (Exception e) {
 						Log.e(TAG, "Erreur lors du parsing du classifier : " + filename);
@@ -375,9 +263,21 @@ public class ShowAnalyse extends Activity {
 
 		@Override
 		protected void onPostExecute(String result) {
-			Global.parseVocabulary(result);
+			
+			try {
+				FileOutputStream fos = openFileOutput(Global.vocabFile, Context.MODE_PRIVATE);
+				fos.write(result.getBytes());
+				fos.close();
+			} catch (Exception e) {
+				Log.e(TAG, "Erreur lors de l'enregistrement du fichier : " + Global.vocabFile);
+			}
+			
+			Global.parseVocabulary(Global.vocabFile);
 			
 			progressDialog.dismiss();
+			
+			//TODO
+			//compare(imread("caca"));
 			
 			Toast.makeText(ShowAnalyse.this, "Comparaison terminée", Toast.LENGTH_LONG).show();
 		}
@@ -391,6 +291,36 @@ public class ShowAnalyse extends Activity {
 			} else {
 				progressDialog.setMessage("Téléchargement des fichiers classifiers...\t " + values[0] + '/' + nbClassifierToDL);
 			}
+		}
+		
+		private void analyseScene(Mat src) {
+			KeyPoint _scenekeypoints = new KeyPoint();
+			Mat _scenedescriptors = new Mat();
+			
+			// Extraction of the descriptors
+			SIFTdetector.detectAndCompute(src, Mat.EMPTY,_scenekeypoints, _scenedescriptors);
+			bowide.compute(src, _scenekeypoints, response_hist);			
+		}
+		
+		private String compare(Mat src) {		
+			
+			analyseScene(src);
+			
+	      	bowide.setVocabulary(Global.vocabulary);
+	      	
+	      	float minf = Float.MAX_VALUE;
+	      	String bestMatch = null;
+	      	for (int i = 0; i < Global.classes.size(); i++)
+	        {
+         		// classifier prediction based on reconstructed histogram
+         		float res = classifiers[i].predict(response_hist, true);
+         		//System.out.println(class_names[i] + " is " + res);
+         		if (res < minf) {
+         			minf = res;
+         			bestMatch = Global.classes.get(i).getBrand();
+         		}
+         	}
+	      	return bestMatch;
 		}
 	}
 }
